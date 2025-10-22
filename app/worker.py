@@ -3,7 +3,6 @@ from celery import Celery
 import meilisearch
 import uuid
 from presidio_analyzer import AnalyzerEngine
-import spacy # spacy를 import
 
 # Celery 애플리케이션 생성
 celery_app = Celery(
@@ -15,11 +14,10 @@ celery_app = Celery(
 # MeiliSearch 클라이언트 생성
 client = meilisearch.Client(url="http://meilisearch:7700")
 
-# --- Presidio Analyzer 엔진 및 Spacy 모델 로드 ---
-# Spacy 모델을 명시적으로 로드합니다.
-nlp = spacy.load("en_core_web_lg")
-analyzer = AnalyzerEngine(nlp_engine=nlp)
-# ---------------------------------------------
+# --- Presidio Analyzer 엔진 초기화 (가장 안정적인 방식) ---
+# Presidio가 내부적으로 필요한 Spacy 모델을 스스로 불러오도록 합니다.
+analyzer = AnalyzerEngine()
+# ----------------------------------------------------
 
 @celery_app.task
 def process_document(filename: str):
@@ -45,6 +43,7 @@ def process_document(filename: str):
         response = index.add_documents([
             {"id": doc_id, "filename": filename}
         ])
+        # 구버전 라이브러리에 맞는 반환값 처리
         task_uid = response.get('uid') if isinstance(response, dict) else response
         print(f"MeiliSearch 인덱싱 작업이 제출되었습니다: {task_uid}")
     except Exception as e:
