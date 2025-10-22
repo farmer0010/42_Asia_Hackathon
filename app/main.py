@@ -18,20 +18,20 @@ Instrumentator().instrument(app).expose(app)
 def read_root():
     return {"Hello": "42_Asia_Hackathon"}
 
-
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile):
-    # file.read()를 통해 파일의 실제 내용을 바이트(bytes) 형태로 읽어옵니다.
+    # 파일의 실제 내용을 읽어서 Celery 작업으로 전달합니다.
     file_content = await file.read()
-
-    # 파일 내용과 함께 파일 이름도 전달합니다.
     task = process_document.delay(file.filename, file_content)
     return {"task_id": task.id}
+
+# 여러 파일 업로드 기능도 파일 내용을 전달하도록 수정
 @app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     task_ids = []
     for file in files:
-        task = process_document.delay(file.filename)
+        file_content = await file.read()
+        task = process_document.delay(file.filename, file_content)
         task_ids.append(task.id)
     return {"task_ids": task_ids}
 
