@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+prometheus-fastapi-instrumentator
+python-multipart
+celery
+redis
+meilisearch==0.37.0
+qdrant-client

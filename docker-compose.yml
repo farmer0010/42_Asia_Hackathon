@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    container_name: api-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - celery-worker
+      - meilisearch # <-- 추가
+      - qdrant      # <-- 추가
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis-broker
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build: .
+    container_name: celery-worker
+    environment:
+      - PYTHONPATH=/app
+    command: python3 -m celery -A worker worker --loglevel=info
+    depends_on:
+      - redis
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.9
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+
+  qdrant: # <-- 이 줄과 아래 내용의 들여쓰기를 수정했습니다.
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
