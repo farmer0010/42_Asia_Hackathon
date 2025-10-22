@@ -4,15 +4,19 @@ services:
     container_name: api-server
     ports:
       - "8000:8000"
+    environment:
+      # ★★★ 최종 수정: PYTHONPATH를 새로운 WORKDIR과 동일하게 변경합니다. ★★★
+      - PYTHONPATH=/usr/src
     depends_on:
       redis:
         condition: service_healthy
       meilisearch:
-        condition: service_healthy # 이제 정상적으로 기다립니다.
+        condition: service_healthy
       qdrant:
-        condition: service_healthy # 이제 정상적으로 기다립니다.
+        condition: service_started
       celery-worker:
         condition: service_started
+    restart: unless-stopped
 
   redis:
     image: "redis:alpine"
@@ -26,16 +30,20 @@ services:
       retries: 5
     volumes:
       - redis_data:/data
+    restart: unless-stopped
 
   celery-worker:
     build: .
     container_name: celery-worker
     environment:
-      - PYTHONPATH=/app
-    command: python3 -m celery -A worker worker --loglevel=info
+      # ★★★ 최종 수정: PYTHONPATH를 새로운 WORKDIR과 동일하게 변경합니다. ★★★
+      - PYTHONPATH=/usr/src
+    # Celery 앱 경로를 'app.worker' 모듈로 복원합니다.
+    command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
+    restart: unless-stopped
 
   meilisearch:
     image: getmeili/meilisearch:v1.9
@@ -43,27 +51,29 @@ services:
     ports:
       - "7700:7700"
     healthcheck:
-      # --- 이 부분이 수정되었습니다 ---
       test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
       interval: 5s
       timeout: 3s
       retries: 5
     volumes:
       - meili_data:/meili_data
+    restart: unless-stopped
 
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
     ports:
       - "6333:6333"
+    environment:
+      - QDRANT__STORAGE__ON_DISK_PAYLOAD=true
     healthcheck:
-      # --- 이 부분이 수정되었습니다 ---
       test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 10s
+      retries: 15
     volumes:
       - qdrant_data:/qdrant/storage
+    restart: unless-stopped
 
   flower:
     image: mher/flower
@@ -75,6 +85,7 @@ services:
       - FLOWER_PORT=5555
     depends_on:
       - redis
+    restart: unless-stopped
 
 volumes:
   redis_data:
