@@ -5,7 +5,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # ★★★ 최종 수정: PYTHONPATH를 새로운 WORKDIR과 동일하게 변경합니다. ★★★
       - PYTHONPATH=/usr/src
     depends_on:
       redis:
@@ -36,7 +35,6 @@ services:
     build: .
     container_name: celery-worker
     environment:
-      # ★★★ 최종 수정: PYTHONPATH를 새로운 WORKDIR과 동일하게 변경합니다. ★★★
       - PYTHONPATH=/usr/src
     # Celery 앱 경로를 'app.worker' 모듈로 복원합니다.
     command: python -m celery -A app.worker worker --loglevel=info

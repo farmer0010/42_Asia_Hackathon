@@ -25,7 +25,6 @@ qdrant_client = qdrant_client.QdrantClient(host=settings.QDRANT_HOST, port=setti
 
 
 def setup_meilisearch(client: meilisearch.Client):
-    """MeiliSearch의 인덱스 설정을 초기화합니다."""
     try:
         log.info("MeiliSearch 설정을 시작합니다...")
         client.index("documents").update_ranking_rules([
@@ -38,7 +37,7 @@ def setup_meilisearch(client: meilisearch.Client):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """애플리케이션의 시작과 종료 시 수행될 작업을 관리합니다."""
+    """애플리케이션의 시작과 종료 시 수행될 작업을 관리."""
     log.info("애플리케이션 시작...")
     setup_meilisearch(meili_client)
     yield

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 analyzer = AnalyzerEngine()
 
 def ocr_step(file_content: bytes) -> str:
-    """OCR 처리 단계: 파일 내용(bytes)을 받아 텍스트를 추출합니다."""
+    """OCR 처리 단계: 파일 내용(bytes)을 받아 텍스트를 추출."""
     try:
         log.info("--- OCR Step Start ---")
         image = Image.open(io.BytesIO(file_content))
@@ -22,7 +22,7 @@ def ocr_step(file_content: bytes) -> str:
         return ""
 
 def pii_detection_step(text: str):
-    """PII 탐지 단계: 텍스트를 받아 개인정보를 탐지하고 로그를 남깁니다."""
+    """PII 탐지 단계: 텍스트를 받아 개인정보를 탐지하고 로그 제공."""
     try:
         log.info("--- PII Detection Step Start ---")
         pii_results = analyzer.analyze(text=text, language='en')

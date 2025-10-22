@@ -2,10 +2,6 @@ import os
 from functools import lru_cache
 
 class Settings:
-    """
-    애플리케이션 설정을 관리하는 클래스입니다.
-    환경변수에서 값을 읽어오며, 기본값을 제공합니다.
-    """
     # Celery & Redis 설정
     REDIS_BROKER_URL: str = os.getenv("REDIS_BROKER_URL", "redis://redis-broker:6379/0")
 
@@ -21,6 +17,6 @@ class Settings:
 def get_settings():
     """
     설정 객체를 반환하는 함수입니다.
-    lru_cache를 사용하여 한번 생성된 객체를 재사용합니다.
+    lru_cache를 사용하여 한번 생성된 객체를 재사용.
     """
     return Settings()
