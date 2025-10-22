@@ -6,3 +6,6 @@ celery
 redis
 meilisearch==0.37.0
 qdrant-client
+presidio-analyzer==2.2.351
+spacy==3.7.2
+en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl

@@ -23,7 +23,6 @@ async def create_upload_file(file: UploadFile):
     task = process_document.delay(file.filename)
     return {"task_id": task.id}
 
-# 여러 파일 업로드를 위한 엔드포인트 (기억해두기로 했던 코드)
 @app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     task_ids = []
@@ -52,6 +51,7 @@ def search_documents(q: str):
 
 @app.get("/meili-health")
 def get_meili_health():
+    # 구버전 라이브러리에 맞는 건강 상태 확인 방식
     return meili_client.health()
 
 @app.get("/qdrant-health")
@@ -66,13 +66,15 @@ def get_qdrant_health():
 @app.post("/setup-meilisearch", tags=["Setup"])
 def setup_meilisearch_tokenizer():
     try:
-        index = meili_client.index("documents")
-        # 'tokenization' 객체로 감싸서 전달합니다.
-        index.update_settings({
-            'tokenization': {
-                'tokenizer': 'charabia'
-            }
-        })
-        return {"status": "ok", "message": "MeiliSearch tokenizer updated for CJK support."}
+        # 구버전 라이브러리에 맞는 설정 업데이트 방식
+        meili_client.index("documents").update_ranking_rules([
+            "words",
+            "typo",
+            "proximity",
+            "attribute",
+            "sort",
+            "exactness"
+        ])
+        return {"status": "ok", "message": "MeiliSearch settings updated."}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
