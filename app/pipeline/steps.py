@@ -16,8 +16,6 @@ def ocr_step(file_content: bytes) -> str:
         log.info("--- OCR Step Start ---")
         image = Image.open(io.BytesIO(file_content))
 
-        # ⭐️ [핵심 수정] pytesseract에게 'tessdata' 디렉토리의 정확한 위치를 직접 알려줍니다.
-        # Dockerfile에 설정된 TESSDATA_PREFIX 경로와 동일합니다.
         tessdata_dir_config = r'--tessdata-dir "/usr/share/tesseract-ocr/5/tessdata"'
 
         extracted_text = pytesseract.image_to_string(image, lang='eng', config=tessdata_dir_config)

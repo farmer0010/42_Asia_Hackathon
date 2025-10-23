@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
 from contextlib import asynccontextmanager
@@ -22,7 +23,7 @@ meili_client = meilisearch.Client(url=settings.MEILI_HOST_URL)
 qdrant_cli = qdrant_client.QdrantClient(host=settings.QDRANT_HOST, port=settings.QDRANT_PORT)
 
 QDRANT_COLLECTION_NAME = "documents_collection"
-VECTOR_SIZE = 1024 # mock_embedding_step에서 정의한 벡터 차원과 동일해야 합니다.
+VECTOR_SIZE = 1024
 
 def setup_database():
     """MeiliSearch 설정 및 Qdrant 컬렉션 생성을 처리합니다."""
@@ -48,6 +49,7 @@ def setup_database():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """애플리케이션 시작 시 DB 설정 등을 수행합니다."""
     log.info("애플리케이션 시작...")
     setup_database()
     yield
@@ -61,8 +63,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-Instrumentator().instrument(app).expose(app)
+# CORS 미들웨어 설정
+origins = [
+    "*", # 개발 중에는 모든 출처를 허용합니다.
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+Instrumentator().instrument(app).expose(app)
 
 @app.get("/", tags=["Root"])
 def read_root():
@@ -114,13 +128,10 @@ def search_documents(q: str):
 
 @app.get("/hybrid_search", tags=["Search"])
 def hybrid_search_documents(q: str):
-    """키워드 검색과 의미 기반 벡터 검색을 수행."""
+    """키워드 검색과 의미 기반 벡터 검색을 모두 수행합니다."""
     log.info(f"하이브리드 검색 요청: q='{q}'")
     try:
-        # 1. 쿼리를 벡터로 변환 (현재는 Mock 함수 사용)
         query_vector = steps.mock_embedding_step(q)
-
-        # 2. Qdrant에서 의미적으로 유사한 문서 검색
         semantic_hits = []
         if query_vector:
             semantic_hits = qdrant_cli.search(
@@ -128,10 +139,7 @@ def hybrid_search_documents(q: str):
                 query_vector=query_vector,
                 limit=5
             )
-
-        # 3. MeiliSearch에서 키워드가 정확히 일치하는 문서 검색
         keyword_hits = meili_client.index("documents").search(q, {"limit": 5})
-
         return {
             "semantic_search_results": semantic_hits,
             "keyword_search_results": keyword_hits
