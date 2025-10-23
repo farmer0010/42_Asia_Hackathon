@@ -15,8 +15,4 @@ class Settings:
 
 @lru_cache()
 def get_settings():
-    """
-    설정 객체를 반환하는 함수입니다.
-    lru_cache를 사용하여 한번 생성된 객체를 재사용.
-    """
     return Settings()

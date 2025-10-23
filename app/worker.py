@@ -22,9 +22,9 @@ QDRANT_COLLECTION_NAME = "documents_collection"
 @celery_app.task(
     bind=True,  # self 인자를 사용하기 위함
     autoretry_for=(Exception,),  # 모든 예외에 대해 자동 재시도
-    retry_kwargs={'max_retries': 3},  # 최대 3번 재시도
-    retry_backoff=True,  # 재시도 간격이 점차 증가
-    retry_backoff_max=60  # 최대 재시도 간격 60초
+    retry_kwargs={'max_retries': 3},
+    retry_backoff=True,
+    retry_backoff_max=60
 )
 def process_document(self, filename: str, file_content: bytes):
     """문서 처리 전체 파이프라인을 비동기로 실행하는 Celery 작업."""

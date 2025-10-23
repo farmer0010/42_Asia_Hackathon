@@ -36,7 +36,6 @@ services:
     container_name: celery-worker
     environment:
       - PYTHONPATH=/usr/src
-    # Celery 앱 경로를 'app.worker' 모듈로 복원합니다.
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:

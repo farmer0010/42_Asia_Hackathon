@@ -11,7 +11,7 @@ from .worker import process_document, celery_app
 from .config import get_settings
 from . import schemas
 from .logger_config import setup_logging
-from .pipeline import steps # steps 모듈 추가
+from .pipeline import steps
 
 setup_logging()
 log = logging.getLogger(__name__)
@@ -48,7 +48,6 @@ def setup_database():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """애플리케이션 시작 시 DB 설정 등을 수행합니다."""
     log.info("애플리케이션 시작...")
     setup_database()
     yield
@@ -115,7 +114,7 @@ def search_documents(q: str):
 
 @app.get("/hybrid_search", tags=["Search"])
 def hybrid_search_documents(q: str):
-    """키워드 검색과 의미 기반 벡터 검색을 모두 수행합니다."""
+    """키워드 검색과 의미 기반 벡터 검색을 수행."""
     log.info(f"하이브리드 검색 요청: q='{q}'")
     try:
         # 1. 쿼리를 벡터로 변환 (현재는 Mock 함수 사용)
