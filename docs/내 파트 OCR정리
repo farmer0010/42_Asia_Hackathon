@@ -1,0 +1,295 @@
+# 방콕 해커톤 - 내 파트 최종 전략
+
+## 1. 프로젝트 목표
+* **나의 역할:** OCR + 문서 분류 + 구조화 데이터 추출
+* **핵심 원칙:** Simple, Fast, Reliable
+* **제약사항:** Mac M1/M2, CPU only, RAM 2-3GB, 당일 학습 1-2시간
+
+## 2. 최종 기술 스택 (간소화)
+
+### Phase 1: OCR (완료 ✓)
+```
+라이브러리: PaddleOCR
+입력: 이미지/PDF (jpg, png, pdf)
+출력: 텍스트만 (bbox 저장 안 함)
+처리 속도: 3-5초/문서
+정확도: 95%+
+```
+
+### Phase 2: 문서 분류 (다음 작업)
+```
+모델: DistilBERT (텍스트 기반)
+입력: OCR 텍스트
+출력: doc_type (invoice/receipt/resume/report/contract)
+크기: ~250MB
+RAM: ~1GB
+학습 시간: 30분 (500개 문서 기준)
+```
+
+### Phase 3: 데이터 추출 (당일 작업)
+```
+모델: BERT-NER (Named Entity Recognition)
+입력: OCR 텍스트 (단어별 분리)
+출력: B-VENDOR, B-AMOUNT, B-DATE 태그
+대상: invoice, receipt만
+크기: ~400MB
+RAM: ~1.5GB
+학습 시간: 1시간
+```
+
+## 3. 최종 출력 형식 (LLM 파트에게 전달할거)
+
+```json
+{
+  "filename": "invoice_123.pdf",
+  "full_text_ocr": "Commercial Invoice ABC Corp Total 1500.00...",
+  "ocr_confidence": 0.97,
+  "classification": {
+    "doc_type": "invoice",
+    "confidence": 0.98
+  },
+  "extracted_data": {
+    "vendor": "ABC Corp",
+    "invoice_date": "2025-08-19",
+    "total_amount": 1500.00,
+    "currency": "THB"
+  },
+  "processing_time": 6.2
+}
+```
+
+## 4. 해커톤 당일 워크플로우
+
+### 데이터 받기 (오전)
+```
+hackathon_dataset/
+├── training_set/
+│   ├── documents/ (500-1000개)
+│   └── labels.csv (정답!)
+└── testing_set/
+    └── documents/ (100-200개, 레이블 없음)
+```
+
+### labels.csv 예상 형식
+```csv
+filename,doc_type,vendor,invoice_date,total_amount,currency
+inv_001.pdf,invoice,ABC Corp,2025-08-19,1500.00,THB
+receipt_001.jpg,receipt,Supermarket,2025-08-20,107.60,THB
+```
+
+### 당일 실행 순서
+```bash
+# 1. training_set OCR 처리 (30분)
+python src/batch_ocr.py --input training_set/documents --output ocr_results.json
+
+# 2. 분류 모델 학습 (30분)
+python src/train_classifier.py --labels labels.csv --ocr ocr_results.json
+
+# 3. 추출 모델 학습 (1시간)
+python src/train_extractor.py --labels labels.csv --ocr ocr_results.json
+
+# 4. testing_set 예측 (10분)
+python src/predict.py --input testing_set/documents --output predictions.json
+
+# 5. 제출 (바로)
+cp predictions.json final_submission.json
+```
+
+## 5. 모듈별 역할
+
+### src/ocr_module.py (완료 ✓)
+```python
+class OCRModule:
+    def extract_text(file_path):
+        # 이미지/PDF → 텍스트
+        return {'text': '...', 'confidence': 0.95}
+```
+
+### src/classification_module.py (다음 작업)
+```python
+class DocumentClassifier:
+    def __init__(model_path):
+        # DistilBERT 로드
+        
+    def train(labels_csv, ocr_results):
+        # 학습 (30분)
+        
+    def classify(text):
+        # 예측
+        return {'doc_type': 'invoice', 'confidence': 0.98}
+```
+
+### src/extraction_module.py (당일 작업)
+```python
+class DataExtractor:
+    def __init__(model_path):
+        # BERT-NER 로드
+        
+    def train(labels_csv, ocr_results):
+        # 학습 (1시간)
+        
+    def extract(text, doc_type):
+        # 예측 (invoice/receipt만)
+        return {
+            'vendor': '...',
+            'total_amount': 0.00,
+            'invoice_date': '...',
+            'currency': '...'
+        }
+```
+
+### src/main.py (통합 모듈)
+```python
+def process_document(image_path):
+    # 1. OCR
+    ocr_result = ocr.extract_text(image_path)
+    
+    # 2. 분류
+    classification = classifier.classify(ocr_result['text'])
+    
+    # 3. 추출
+    extracted = None
+    if classification['doc_type'] in ['invoice', 'receipt']:
+        extracted = extractor.extract(
+            ocr_result['text'], 
+            classification['doc_type']
+        )
+    
+    # 4. 통합
+    return {
+        'filename': Path(image_path).name,
+        'full_text_ocr': ocr_result['text'],
+        'classification': classification,
+        'extracted_data': extracted
+    }
+```
+
+## 6. 왜 이 전략인가?
+
+### 장점
+```
+✓ 구현 간단 (텍스트만 사용)
+✓ 빠른 학습 (총 1.5시간)
+✓ 메모리 안전 (총 2.5GB)
+✓ 디버깅 쉬움
+✓ AI 모델 사용 (과제 요구사항 충족)
+✓ 일반화 가능 (새로운 형식 대응)
+```
+
+### LayoutLM을 사용하지 않는 이유
+```
+✗ 복잡한 전처리 (텍스트 + bbox + 정규화)
+✗ 큰 메모리 (2-3GB, 빡빡함)
+✗ 긴 학습 시간 (2-3시간)
+✗ 버그 위험성 높음
+✗ 텍스트만으로도 85%+ 정확도 가능
+```
+
+## 7. 성능 및 효율성 (실측 결과)
+
+### 실제 측정 결과
+```
+분류 모듈 (DistilBERT):
+- 메모리 사용량: 643MB (목표 3GB의 21%)
+- 처리 속도: ~0.5초/문서 (목표 10초의 5%)
+- 모델 크기: 268MB
+- 종합 평가: S급 ✓
+```
+
+### 왜 효율적인가?
+
+#### 1. torch.no_grad() 사용
+```python
+with torch.no_grad():
+    outputs = self.model(**inputs)
+```
+- 그래디언트 계산 생략 (예측 시 불필요)
+- 메모리 50% 절약
+- 속도 향상
+
+#### 2. 경량 모델 선택
+```
+BERT-base: 440MB, 느림
+DistilBERT: 268MB, 2배 빠름 ✓ (우리 선택)
+→ 크기 40% 감소
+→ 속도 2배 향상
+→ 성능 97% 유지
+```
+
+#### 3. 효율적인 토크나이저 설정
+```python
+max_length=512      # 필요한 만큼만
+truncation=True     # 긴 텍스트 자르기
+padding=True        # 배치 처리 최적화
+```
+
+#### 4. Mac M1/M2 최적화 준비
+```
+현재: CPU 사용 (충분히 빠름)
+옵션: Metal GPU 사용 가능 (2-3배 더 빠름)
+→ 필요시 간단히 추가 가능
+```
+
+### 전체 파이프라인 메모리 예측
+```
+OCR (PaddleOCR):      ~300MB
+분류 (DistilBERT):    ~643MB
+추출 (BERT-NER):      ~800MB (예정)
+기타 (Python, 데이터): ~200MB
+──────────────────────────────
+총합:                 ~2GB
+목표:                 3GB 이하 ✓
+여유:                 1GB
+```
+
+### 최적화 여지 (선택사항)
+```
+1. Metal GPU 사용: 2-3배 빠름 (시간 있으면)
+2. 배치 처리: 10배 빠름 (시간 있으면)
+3. 현재도 충분히 빠름: 최적화 보류 ✓
+```
+
+## 8. 현재 상태 체크리스트
+
+- [x] OCR 모듈 완성
+- [x] OCR 테스트 (4개 샘플, 95% 정확도)
+- [x] 가상환경 설정
+- [x] requirements.txt 작성
+- [x] 분류 모듈 작성 (classification_module.py)
+  - [x] __init__() 함수
+  - [x] classify() 함수
+  - [x] save_model() 함수
+  - [x] load_model() 함수
+  - [x] 테스트 코드
+  - [x] 성능 측정 (643MB, S급)
+  - [ ] train() 함수 (다음 작업)
+- [ ] 추출 모듈 템플릿 작성
+- [ ] 학습 자동화 스크립트
+- [ ] 배치 처리 스크립트
+- [ ] 통합 모듈
+
+## 9. 협업 인터페이스
+
+### 내가 생성하는 파일
+```
+outputs/final_results.json
+→ LLM 파트에게 전달
+```
+
+### LLM 파트가 추가하는 것
+```json
+{
+  ...(내 결과물),
+  "summary": "Invoice from ABC Corp for $1,500",
+  "pii_detected": ["email@example.com", "123-456-7890"]
+}
+```
+
+### 백엔드 파트 역할
+```
+- 모든 모듈 통합
+- Docker 컨테이너화
+- run.sh 스크립트 작성
+- 최종 제출
+```
+

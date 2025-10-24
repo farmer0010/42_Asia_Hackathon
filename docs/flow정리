@@ -1,0 +1,154 @@
+# 방콕 해커톤 - 환경 설정 및 실행 가이드
+
+## 1. 가상환경 활성화
+```bash
+cd "/Users/ahnhyunjun/Desktop/방콕 해커톤"
+source venv/bin/activate
+```
+
+## 2. 패키지 설치 (이미 완료)
+```bash
+# requirements.txt에서 한 번에 설치
+pip install -r requirements.txt
+```
+
+### requirements.txt 내용:
+```
+paddleocr==2.8.1              # OCR
+opencv-python==4.10.0.84      # 이미지 전처리
+pillow==11.0.0                # 이미지 처리
+pdf2image==1.17.0             # PDF 변환
+torch==2.9.0                  # M1/M2 전용
+torchvision==0.24.0           # 비전 모델
+transformers==4.46.3          # DistilBERT, BERT-NER
+datasets==3.2.0               # 데이터 로딩
+scikit-learn==1.6.0           # 평가 지표
+tqdm==4.67.1                  # 진행바
+numpy==1.26.4                 # 수치 연산
+pandas==2.2.3                 # CSV 처리
+```
+
+## 3. 모듈별 테스트
+
+### OCR 모듈 테스트 (완료)
+```bash
+cd "/Users/ahnhyunjun/Desktop/방콕 해커톤"
+source venv/bin/activate
+python src/ocr_module.py
+```
+결과: `outputs/ocr_test_results.json`
+
+### 분류 모듈 테스트 (다음 작업)
+```bash
+python src/classification_module.py
+```
+
+### 추출 모듈 테스트 (당일)
+```bash
+python src/extraction_module.py
+```
+
+### 통합 파이프라인 실행
+```bash
+python src/main.py --input test_samples/sample1.jpg
+```
+
+## 4. 해커톤 당일 실행 순서
+
+### Step 1: OCR 일괄 처리 (30분)
+```bash
+python src/batch_ocr.py \
+  --input hackathon_dataset/training_set/documents \
+  --output outputs/training_ocr.json
+```
+
+### Step 2: 분류 모델 학습 (30분)
+```bash
+python src/train_classifier.py \
+  --labels hackathon_dataset/training_set/labels.csv \
+  --ocr outputs/training_ocr.json \
+  --output models/classifier.pt
+```
+
+### Step 3: 추출 모델 학습 (1시간)
+```bash
+python src/train_extractor.py \
+  --labels hackathon_dataset/training_set/labels.csv \
+  --ocr outputs/training_ocr.json \
+  --output models/extractor.pt
+```
+
+### Step 4: 테스트셋 예측 (10분)
+```bash
+python src/predict.py \
+  --input hackathon_dataset/testing_set/documents \
+  --classifier models/classifier.pt \
+  --extractor models/extractor.pt \
+  --output final_submission.json
+```
+
+## 5. 유용한 명령어
+
+### 가상환경 비활성화
+```bash
+deactivate
+```
+
+### 패키지 목록 확인
+```bash
+pip list
+```
+
+### 메모리 사용량 확인
+```bash
+# 학습 중
+top -pid $(pgrep -f python)
+```
+
+### GPU 사용 확인 (M1/M2)
+```bash
+# Metal 사용 여부 확인
+python -c "import torch; print(torch.backends.mps.is_available())"
+```
+
+## 6. 트러블슈팅
+
+### PaddleOCR 오류
+```bash
+# 재설치
+pip uninstall paddleocr paddlepaddle -y
+pip install paddleocr==2.8.1 paddlepaddle==3.2.0
+```
+
+### Torch 오류 (M1/M2)
+```bash
+# M1/M2 전용 버전 확인
+pip install torch==2.9.0 torchvision==0.24.0
+```
+
+### 메모리 부족
+```bash
+# 배치 사이즈 줄이기
+# train_*.py 파일에서 --batch_size 4로 변경
+```
+
+## 7. 폴더 구조 확인
+
+```
+방콕 해커톤/
+├── venv/                    # 가상환경
+├── requirements.txt         # 패키지 목록
+├── src/
+│   ├── ocr_module.py       # ✓ 완료
+│   ├── classification_module.py  # 다음 작업
+│   ├── extraction_module.py      # 당일 작업
+│   ├── main.py             # 통합 모듈
+│   ├── batch_ocr.py        # 배치 OCR
+│   ├── train_classifier.py # 분류 학습
+│   ├── train_extractor.py  # 추출 학습
+│   └── predict.py          # 예측
+├── models/                 # 학습된 모델 저장
+├── outputs/                # 결과 JSON
+├── test_samples/           # 테스트 이미지
+└── docs/                   # 문서
+```

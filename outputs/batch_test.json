@@ -1,0 +1,22 @@
+{
+  "sample4.jpg": {
+    "text": "Receipt\nAdress:1234 Lorem Ipsum,Dolor\nTe1:123-456-7890\nDate:01-01-2018\n10:35\nLorem\n6.50\nIpsum\n7.50\nDolor Sit\n48.00\nAmet\n9.30\nConsectetur\n11.90\nAdipiscing Elit\n1.20\nSed Do\n0.40\nAMOUNT\n84.80\nSub-total\n76.80\nSales Tax\n8.00\nBalance\n84.80",
+    "confidence": 0.9857179323832194,
+    "processing_time": 2.505279064178467
+  },
+  "sample1.jpg": {
+    "text": "Commercial Invoice\nInvoice Number:\nC12023-001\nInvoice Date:\nSeptember 30.2030\nExporter Information\nImporter Information\nCompany Name:ABC Exports Ltd.\nConsignee Name:XYZ Importers Inc.\nCompany Address:123 Exporter Street,Export City\nConsignee Address:456 Importer Street,Import City\nPhone Number:123456-7890\nDestination Country:Important\nEmail: info@abcexports.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):$13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBank Account Number:1234-5678-9012-3456\nPayee Name:ABC Exports Ltd.\nDate:September 30,2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nXYZ Importers Inc.",
+    "confidence": 0.9704059617859977,
+    "processing_time": 5.423208951950073
+  },
+  "sample3.jpeg": {
+    "text": "SUPERMARKET\nCity Index02025\nLorem ipeum 258\nTel+456-468987-02\nCashier.\nManager:\nEric Steer\n#3\nNane\nOF\nPrice\nLoremipsum\n1\n$19.20\n9.20\nLorem ipsum dolor sit\nLorem ipsum dolo sit amet\n1\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum dolorsit\n1\n$15.00\nLorem ipsum\n$19.20\n---------\nSub Total\n$107.60\nCASH\nCHANGE\n$200.00\n$92.40\nClad to see you again\nTHANK YOUI",
+    "confidence": 0.8640312790870667,
+    "processing_time": 2.5418500900268555
+  },
+  "sample2.png": {
+    "text": "SA\nMalaysia Invoice\nInvoice no\n001\nInvoice dote:\nJul 13th,2021\nDUe\nFeb 13th2021\nFrom\nBill to\nSaldo Apps\nShepard corp.\nJohn Smith\nshepard@mail.com\nwiz@saldoapps.com\n80296979597\n80296979597\nNorth str., 32, Chicago, USA\nsaldoapps.com\nFirst str.,28-32,Chicago, USA\nShipto\nNorth str., 32, Chicago, USA\nTrack#:RO80296979597\nDESCRIPTION\nRATE, CADA\nQTY\nTAX\nDISC\nAMOUNT, CADA\nPrototype\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPrototype-based programming is a style\nof object-oriented programming\nDesign\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPayment instruction\nSubtotal:\nUSD8000.00\nPaypal email\nDiscount (20%):\nUSD0.00\nwiz@saldoapps.com\nShipping Cost:\nUSD0.00\nMake checks payable to\nSales Tax\nUSD450.00\nJohn Smith\nTotal:\nUSD8,480.00\nAmount paid:\nUSD 0.00\nBank Transfer\nRouting ABA):061120084\nBalance Due:\nUSD8,480.00\nNotes\nPrototype-based programming is a style of\nobject-oriented programming in which behaviour",
+    "confidence": 0.9778571182222509,
+    "processing_time": 5.668691158294678
+  }
+}
