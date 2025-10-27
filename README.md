@@ -1,4 +1,4 @@
-# 🧠 42 Asia Hackathon - 지능형 문서 처리 AI 엔진 (Backend)
+# 42 Asia Hackathon - 지능형 문서 처리 AI 엔진 (Backend)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.95-green?logo=fastapi&logoColor=white)
@@ -9,7 +9,7 @@
 
 ---
 
-## 🎯 프로젝트 개요
+## 프로젝트 개요
 
 2025 아시아 해커톤 출품작으로, 업로드된 문서 이미지(PDF/JPG/PNG)에 대해 **OCR, 문서 분류, 정보 추출, 검색**까지 지원하는 지능형 문서 처리 AI 엔진 백엔드입니다.
 
