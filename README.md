@@ -37,10 +37,10 @@ graph LR
     Celery_Worker --> MeiliSearch
     Celery_Worker --> Qdrant
 
-
-
 성 요소
+
 컴포넌트	역할
+
 FastAPI (app/main.py)	사용자 요청 처리, 작업 큐잉, 검색 인터페이스
 Celery (app/worker.py)	Redis 작업 수신, 비동기 문서 처리
 AI 모듈 (app/pipeline/)	OCR, 분류, 추출 등 AI 로직 수행
