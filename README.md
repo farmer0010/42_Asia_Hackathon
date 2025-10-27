@@ -11,15 +11,15 @@
 
 ## 🎯 프로젝트 개요
 
-**2025 아시아 해커톤 출품작**으로, 업로드된 문서 이미지(PDF/JPG/PNG)에 대해 **OCR, 문서 분류, 정보 추출, 검색**까지 지원하는 지능형 문서 처리 AI 엔진 백엔드입니다.  
+2025 아시아 해커톤 출품작으로, 업로드된 문서 이미지(PDF/JPG/PNG)에 대해 **OCR, 문서 분류, 정보 추출, 검색**까지 지원하는 지능형 문서 처리 AI 엔진 백엔드입니다.
 
 ### 핵심 기능
 
-- 📝 **OCR (텍스트 추출)** - `PaddleOCR`  
-- 📂 **문서 분류** - `DistilBERT` 기반 자동 분류 (invoice, receipt 등)  
-- 🔍 **정보 추출 (Extraction)** - `BERT-NER` 기반 핵심 정보 구조화 (금액, 날짜, 회사명)  
-- 🤖 **의미 기반 검색 / 요약** - LLM(`vLLM` / `Ollama`) 활용 벡터 임베딩 및 요약 (Phase 2)  
-- 💾 **결과 저장 및 검색** - 키워드 검색: `MeiliSearch`, 벡터 검색: `Qdrant`  
+- 📝 **OCR (텍스트 추출)** - PaddleOCR
+- 📂 **문서 분류** - DistilBERT 기반 자동 분류 (invoice, receipt 등)
+- 🔍 **정보 추출 (Extraction)** - BERT-NER 기반 핵심 정보 구조화 (금액, 날짜, 회사명)
+- 🤖 **의미 기반 검색 / 요약** - LLM(vLLM / Ollama) 활용 벡터 임베딩 및 요약 (Phase 2)
+- 💾 **결과 저장 및 검색** - 키워드 검색: MeiliSearch, 벡터 검색: Qdrant
 
 ---
 
@@ -27,21 +27,19 @@
 
 ```mermaid
 graph LR
-    A[사용자/클라이언트] --> B[FastAPI 서버]
-    B --> C[Redis (Celery Broker)]
+    A[Client] --> B[FastAPI_Server]
+    B --> C[Redis_Celery_Broker]
     B --> D[MeiliSearch]
     B --> E[Qdrant]
-    F[Celery 워커] --> C
-    F --> G[AI 모듈 (OCR/분류/추출)]
-    F --> H[vLLM/Ollama 서버]
+    F[Celery_Worker] --> C
+    F --> G[AI_Module_OCR_Classification_Extraction]
+    F --> H[vLLM_Ollama]
     F --> D
     F --> E
 
-    style F fill:#f9f,stroke:#333,stroke-width:2px
-    style G fill:#ccf,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
 
 구성 요소
+
 컴포넌트	역할
 FastAPI (app/main.py)	사용자 요청 처리, 작업 큐잉, 검색 인터페이스
 Celery (app/worker.py)	Redis 작업 수신, 비동기 문서 처리
@@ -51,7 +49,7 @@ MeiliSearch	키워드 검색 및 필터링
 Qdrant	의미 기반 벡터 검색 (Phase 2)
 Flower	Celery 작업 모니터링 UI
 vLLM / Ollama	LLM 서빙 엔진 (Phase 2)
-
+📂 프로젝트 구조
 42_Asia_Hackathon-backend/
 ├── app/
 │   ├── pipeline/
@@ -68,17 +66,22 @@ vLLM / Ollama	LLM 서빙 엔진 (Phase 2)
 ├── docker-compose.monitoring.yml
 ├── prometheus.yml
 └── requirements.txt
-🚀 빠른 시작
-1️⃣ 사전 준비
 
+🚀 빠른 시작
+
+1️⃣ 사전 준비
 Docker & Docker Compose 설치 (Docker Desktop 권장)
 
 2️⃣ 프로젝트 클론
+
 git clone <repository_url>
 cd 42_Asia_Hackathon-backend
 
+
 3️⃣ Docker Compose 실행
+
 docker-compose up --build -d
+
 
 4️⃣ 서비스 확인
 
@@ -94,6 +97,7 @@ Flower: http://localhost:5555
 Redis: 포트 6379
 
 5️⃣ 모니터링 (선택)
+
 docker-compose -f docker-compose.monitoring.yml up -d
 
 
@@ -105,6 +109,7 @@ Grafana: http://localhost:3000
 cAdvisor: http://localhost:8080
 
 6️⃣ 종료
+
 docker-compose down
 docker-compose -f docker-compose.monitoring.yml down
 
