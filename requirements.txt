@@ -6,9 +6,19 @@ celery
 redis
 meilisearch==0.37.0
 qdrant-client
+Pillow
+numpy
 presidio-analyzer==2.2.351
 spacy==3.7.2
 en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
-pytesseract
-Pillow
-numpy #LLM 임시 벡터파일
+paddleocr==2.8.1
+paddlepaddle
+opencv-python==4.10.0.84
+pdf2image==1.17.0
+torch==2.9.0
+torchvision==0.24.0
+transformers==4.46.3
+datasets==3.2.0
+scikit-learn==1.6.0
+tqdm==4.67.1
+pandas==2.2.3
