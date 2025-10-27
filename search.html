@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI Document Engine - Search Results</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3B82F6",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#1F2937",
+                        "text-primary-light": "#1F2937",
+                        "text-primary-dark": "#F9FAFB",
+                        "text-secondary-light": "#6B7280",
+                        "text-secondary-dark": "#9CA3AF",
+                        "border-light": "#E5E7EB",
+                        "border-dark": "#374151",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#111827",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+
+    <link href="style.css" rel="stylesheet" />
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark font-display">
+    <div class="flex h-screen w-full flex-col">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark z-20 flex-shrink-0">
+            <div class="flex items-center gap-6 w-full">
+                <div class="flex items-center gap-2">
+                     <div class="size-5 text-primary"> <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path></svg>
+                    </div>
+                    <h1 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-normal">AI Document Engine</h1>
+                </div>
+                <div class="flex-grow max-w-2xl mx-auto">
+                    <form id="search-form" class="flex flex-col w-full">
+                        <div class="flex w-full flex-1 items-stretch rounded-lg h-10">
+                            <div class="text-text-secondary-light dark:text-text-secondary-dark flex bg-background-light dark:bg-background-dark items-center justify-center pl-4 rounded-l-lg border-y border-l border-border-light dark:border-border-dark">
+                                <span class="material-symbols-outlined text-base">search</span>
+                            </div>
+                            <input id="search-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-primary-light dark:text-text-primary-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border-y border-r border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark h-full placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark px-4 text-sm font-normal leading-normal" placeholder="Search documents..." value="" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </header>
+        
+        <div class="flex flex-1 overflow-hidden">
+            <aside class="w-72 flex-shrink-0 border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark flex flex-col justify-between p-4 overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-1">
+                        <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark" href="index.html">
+                            <span class="material-symbols-outlined text-xl">grid_view</span>
+                            <p class="text-sm font-medium leading-normal">Dashboard</p>
+                        </a>
+                        <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-dark" href="#">
+                            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">description</span>
+                            <p class="text-sm font-medium leading-normal">Documents</p>
+                        </a>
+                    </div>
+                    <div class="border-t border-border-light dark:border-border-dark pt-4">
+                        <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] px-3 pb-2">Filters</h3>
+                        </div>
+                </div>
+                <div class="flex flex-col gap-1 border-t border-border-light dark:border-border-dark pt-2">
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark" href="#"><span class="material-symbols-outlined text-xl">settings</span><p>Settings</p></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark" href="#"><span class="material-symbols-outlined text-xl">help</span><p>Help</p></a>
+                </div>
+            </aside>
+            
+            <main class="flex-1 bg-background-light dark:bg-background-dark overflow-y-auto custom-scrollbar">
+                <div class="max-w-4xl mx-auto p-6">
+                    <p id="search-results-summary" class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">Loading results...</p>
+                    
+                    <div class="flex flex-col gap-10">
+                        <div>
+                            <h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-4">Exact Matches (Keyword)</h2>
+                            <div id="keyword-results" class="space-y-4">
+                                </div>
+                        </div>
+                        
+                        <div>
+                            <h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-4">Related Documents (Semantic)</h2>
+                            <div id="semantic-results" class="space-y-4">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
