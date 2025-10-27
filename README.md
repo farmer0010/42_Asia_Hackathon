@@ -36,16 +36,3 @@ graph LR
     Celery_Worker --> LLM_Server
     Celery_Worker --> MeiliSearch
     Celery_Worker --> Qdrant
-
-### 구성 요소
-
-| 컴포넌트 | 역할 |
-|----------|------|
-| FastAPI (app/main.py) | 사용자 요청 처리, 작업 큐잉, 검색 인터페이스 |
-| Celery (app/worker.py) | Redis 작업 수신, 비동기 문서 처리 |
-| AI 모듈 (app/pipeline/) | OCR, 분류, 추출 등 AI 로직 수행 |
-| Redis | Celery 브로커 |
-| MeiliSearch | 키워드 검색 및 필터링 |
-| Qdrant | 의미 기반 벡터 검색 (Phase 2) |
-| Flower | Celery 작업 모니터링 UI |
-| vLLM / Ollama | LLM 서빙 엔진 (Phase 2) |
