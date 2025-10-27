@@ -49,6 +49,7 @@ Qdrant	의미 기반 벡터 검색 (Phase 2)
 Flower	Celery 작업 모니터링 UI
 vLLM / Ollama	LLM 서빙 엔진 (Phase 2)
 
+
 📂 프로젝트 구조
 42_Asia_Hackathon-backend/
 ├── app/
