@@ -24,8 +24,6 @@
 ---
 
 ## 🏗️ 시스템 아키텍처
-
-```mermaid
 graph LR
     Client --> FastAPI_Server
     FastAPI_Server --> Redis_Broker
