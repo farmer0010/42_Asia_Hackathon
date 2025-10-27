@@ -37,7 +37,7 @@ graph LR
     Celery_Worker --> MeiliSearch
     Celery_Worker --> Qdrant
 
-성 요소
+
 
 컴포넌트	역할
 
