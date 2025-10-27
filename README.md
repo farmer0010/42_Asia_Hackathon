@@ -1,4 +1,4 @@
-# 42 Asia Hackathon - 지능형 문서 처리 AI 엔진 (Backend)
+# 🧠 42 Asia Hackathon - 지능형 문서 처리 AI 엔진 (Backend)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.95-green?logo=fastapi&logoColor=white)
@@ -24,6 +24,9 @@
 ---
 
 ## 🏗️ 시스템 아키텍처
+
+```mermaid
+graph LR
     A[사용자/클라이언트] -- HTTP Request --> B(FastAPI 서버)
     B -- 작업 요청 --> C{Redis (Celery Broker)}
     B -- 검색 요청 --> D(MeiliSearch)
@@ -37,7 +40,6 @@
     style F fill:#f9f,stroke:#333,stroke-width:2px
     style G fill:#ccf,stroke:#333,stroke-width:2px
     style H fill:#ccf,stroke:#333,stroke-width:2px
-
 구성 요소
 컴포넌트	역할
 FastAPI (app/main.py)	사용자 요청 처리, 작업 큐잉, 검색 인터페이스
@@ -49,8 +51,9 @@ Qdrant	의미 기반 벡터 검색 (Phase 2)
 Flower	Celery 작업 모니터링 UI
 vLLM / Ollama	LLM 서빙 엔진 (Phase 2)
 
-
 📂 프로젝트 구조
+arduino
+코드 복사
 42_Asia_Hackathon-backend/
 ├── app/
 │   ├── pipeline/
@@ -72,9 +75,13 @@ vLLM / Ollama	LLM 서빙 엔진 (Phase 2)
 Docker & Docker Compose 설치 (Docker Desktop 권장)
 
 2️⃣ 프로젝트 클론
+bash
+코드 복사
 git clone <repository_url>
 cd 42_Asia_Hackathon-backend
 3️⃣ Docker Compose 실행
+bash
+코드 복사
 docker-compose up --build -d
 4️⃣ 서비스 확인
 API (Swagger UI): http://localhost:8000/docs
@@ -88,6 +95,8 @@ Flower: http://localhost:5555
 Redis: 포트 6379
 
 5️⃣ 모니터링 (선택)
+bash
+코드 복사
 docker-compose -f docker-compose.monitoring.yml up -d
 Prometheus: http://localhost:9090
 
@@ -96,6 +105,8 @@ Grafana: http://localhost:3000 (admin/admin)
 cAdvisor: http://localhost:8080
 
 6️⃣ 종료
+bash
+코드 복사
 docker-compose down
 docker-compose -f docker-compose.monitoring.yml down
 ⚙️ API 엔드포인트
