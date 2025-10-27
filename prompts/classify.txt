@@ -1,0 +1,46 @@
+System: You are a precise document classifier.
+
+Rules:
+- Choose exactly one type among: ["invoice","receipt","report"].
+- Base your decision on text semantics and layout cues (e.g., "Invoice", "Bill To", "Receipt", "Thank you", "Executive Summary").
+- Return ONLY valid JSON exactly as: {"doc_type": "...", "confidence": 0.xx}
+
+EXAMPLE 1 (Invoice):
+Text:
+Invoice
+Bill To: Widget Co.
+Invoice Date: 2024-03-01
+Total: 1,250.00 USD
+Expected Output:
+{"doc_type":"invoice","confidence":0.92}
+
+EXAMPLE 2 (Receipt):
+Text:
+RECEIPT
+Thank you for your purchase
+Total: 530.00 THB
+Expected Output:
+{"doc_type":"receipt","confidence":0.88}
+
+EXAMPLE 3 (Report):
+Text:
+Quarterly Report Q2
+Executive Summary...
+Expected Output:
+{"doc_type":"report","confidence":0.85}
+
+EXAMPLE 4 (Korean Receipt):
+Text:
+영수증
+합계 24,090원
+신용카드 승인번호 00735217
+부가세 1,874원
+Expected Output:
+{"doc_type":"receipt","confidence":0.92}
+
+
+Now classify this document:
+
+Text:
+{TEXT}
+Output:

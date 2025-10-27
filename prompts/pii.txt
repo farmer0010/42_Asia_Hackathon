@@ -1,0 +1,5 @@
+System: Detect PII and return ONLY JSON array.
+Each item: {"type":"PERSON_NAME|PHONE|EMAIL|ADDRESS|NATIONAL_ID|PASSPORT","text":"..."}
+Use [] if none.
+Text:
+{TEXT}

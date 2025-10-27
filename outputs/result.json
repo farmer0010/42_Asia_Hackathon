@@ -1,0 +1,25 @@
+{
+  "filename": "ocr.txt",
+  "classification": {
+    "doc_type": "receipt",
+    "confidence": 0.95
+  },
+  "full_text_ocr": "재미있는 일상 플랫폼 GS25\n\nGS25*****\n\n*** 6032785687\n\n서울 *** ****** **-*, **\n\n2023/11/24 *** NO: 17509\n\n*정부방침에 의해 교환/환불은\n\n반드시 영수증을 지참하셔야 하며,\n\n카드결제는 30일(12월24일)이내\n\n카드와 영수증 지참 시 가능합니다\n\n투썸로얄밀크티 1 증정품\n\n투썸딸기피치 1 2,800\n\n허쉬쿠키앤크림 1 1,600\n\n허쉬밀크초콜릿 1 1,600\n\n허쉬쿠키앤초코 1 증정품\n\n호가든캔330ML 1 3,500\n\n아몬드초코볼 1 2,000\n\n아몬드빼빼로 1 1,700\n\n화이트빼빼로 1 1,700\n\n초코빼빼로지함 1 1,700\n\n오레오화이트 2 4,000\n\n*재사용봉투20L 1 490\n\n*3L(묶음) 1 3,000\n\n합계수량/금액 14 24,090\n\n과세 매출 18,726\n\n면세 매출 3,490\n\n부가세 1,874\n\n합 계 24,090\n\n신용 카드 24,090\n\n* 는 면세상품 표시입니다\n\n신용카드 전표(고객용)\n\n카드번호 ****-****-****-****\n\n사용금액 24,090원\n\n할 부 0 (매입사: 현대카드)\n\n승인번호 00735217\n\n23/11/25 00: 01: 04 **\n\n일상 생활의 중심\n\nLifestyle Platform GS25\n[출처] OCR한 영수증을 엑셀 파일로 저장하기(CLOVA OCR, ChatGPT, Pandas)|작성자 소소한가",
+  "extracted_data": {
+    "merchant": "GS25",
+    "date": "2023-11-24",
+    "total": 24090,
+    "currency": "KRW"
+  },
+  "summary": "GS25 issued a receipt for ₩24,090 on November 25th, including items like hot drinks and snacks, with a total tax amount of ₩1,874 paid by credit card.",
+  "pii_detected": [
+    {
+      "type": "PHONE",
+      "text": "6032785687"
+    },
+    {
+      "type": "PHONE",
+      "text": "00735217\n\n23"
+    }
+  ]
+}

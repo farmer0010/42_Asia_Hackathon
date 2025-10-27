@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["merchant", "date", "total", "currency"],
+  "properties": {
+    "merchant": { "type": ["string", "null"] },
+    "date": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "total": { "type": ["number", "null"] },
+    "currency": { "type": ["string", "null"] }
+  }
+}
