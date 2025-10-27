@@ -25,21 +25,20 @@
 
 ## 🏗️ 시스템 아키텍처
 
-```mermaid
-graph LR
-    A[사용자/클라이언트] -- HTTP Request --> B(FastAPI 서버)
-    B -- 작업 요청 --> C{Redis (Celery Broker)}
-    B -- 검색 요청 --> D(MeiliSearch)
-    B -- 시맨틱 검색 --> E(Qdrant)
-    F(Celery 워커) -- 작업 수신 --> C
-    F -- 문서 처리 --> G[AI 모듈 (OCR/분류/추출)]
-    F -- LLM 호출 --> H(vLLM/Ollama 서버)
-    F -- 결과 저장 --> D
-    F -- 벡터 저장 --> E
+   A[사용자/클라이언트] --> B(FastAPI 서버)
+    B --> C[Redis (Celery Broker)]
+    B --> D[MeiliSearch]
+    B --> E[Qdrant]
+    F[Celery 워커] --> C
+    F --> G[AI 모듈 (OCR/분류/추출)]
+    F --> H[vLLM/Ollama 서버]
+    F --> D
+    F --> E
 
     style F fill:#f9f,stroke:#333,stroke-width:2px
     style G fill:#ccf,stroke:#333,stroke-width:2px
     style H fill:#ccf,stroke:#333,stroke-width:2px
+    
 구성 요소
 컴포넌트	역할
 FastAPI (app/main.py)	사용자 요청 처리, 작업 큐잉, 검색 인터페이스
