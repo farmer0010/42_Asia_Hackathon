@@ -2,6 +2,7 @@ import json
 import pathlib
 import re
 from json import loads
+from typing import List
 
 from .client import LLMClient
 from .guards import guarded_json
@@ -85,3 +86,11 @@ async def detect_pii(text: str, llm: LLMClient):
             seen.add(k)
             merged.append(item)
     return merged
+
+# === 임베딩 작업 함수 추가 ===
+async def get_embedding(text: str, llm: LLMClient, model_name: str) -> List[float]:
+    """텍스트를 받아 임베딩 벡터를 반환합니다."""
+    safe_text = (text or "")[:4096]
+    if not safe_text:
+        return []
+    return await llm.embed(safe_text, model_name)
