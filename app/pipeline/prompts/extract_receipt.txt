@@ -1,0 +1,17 @@
+System: Extract receipt fields as JSON with the exact keys:
+{
+  "merchant": "string or null",
+  "date": "YYYY-MM-DD or null",
+  "total": "number or null",
+  "currency": "string or null"
+}
+Rules:
+- Return ONLY JSON (no comments/markdown).
+Do not wrap with code fences.
+- If the currency sign "원" appears or prices end with "원", set currency to "KRW".
+- If the text includes KRW-like prices with commas (e.g., 24,090원), parse the number as 24090.
+- For the date, accept formats like "2023/11/24", "23/11/24", "2023-11-24" and normalize to "YYYY-MM-DD".
+- "merchant" should be the store name or brand at the top if present (e.g., GS25).
+- If a field is missing, use null.
+Text:
+{TEXT}
