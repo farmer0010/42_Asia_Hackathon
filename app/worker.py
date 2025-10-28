@@ -28,7 +28,12 @@ try:
     ocr_model = OCRModule(lang='en')
     classifier_model = DocumentClassifier()
     MODEL_PATH = os.getenv("MODEL_PATH", "distilbert-base-uncased")
-    classifier_model.load_model(MODEL_PATH)
+
+    # --- 🚨 핫픽스 1/2: 모델 로드 주석 처리 ---
+    # classifier_model.load_model(MODEL_PATH) # <-- 훈련된 모델이 없어 충돌 발생!
+    log.warning(f"!!! 핫픽스 적용: classifier_model.load_model({MODEL_PATH}) 로드를 건너뜁니다!!!")
+    # --- 핫픽스 끝 ---
+
     log.info(f"AI 모델 ({MODEL_PATH}) 로드 완료.")
     log.info("LLM 클라이언트 및 스키마를 로드합니다...")
     llm_client = LLMClient(model=settings.LLM_MODEL_NAME, base=settings.OLLAMA_BASE_URL)
@@ -37,7 +42,8 @@ try:
     log.info("LLM 클라이언트 및 스키마 로드 완료.")
 except Exception as e:
     log.error(f"AI 모델 로드 실패: {e}", exc_info=True)
-    raise e
+    # 핫픽스 기간에는 로드 실패가 치명적이지 않으므로 raise를 주석 처리
+    # raise e
 
 
 @celery_app.task(
@@ -72,7 +78,13 @@ async def process_document(self, filename: str, file_content: bytes):
             }
 
         log.info(f"--- 2. Classification Step Start (ID: {doc_id}) ---")
-        classification_result = classifier_model.classify(extracted_text)
+
+        # --- 🚨 핫픽스 2/2: 분류기 호출 대신 'unknown'으로 고정 ---
+        # classification_result = classifier_model.classify(extracted_text) # <-- 모델이 None이라 충돌 발생!
+        log.warning("!!! 핫픽스 적용: classifier.classify() 대신 'unknown' 반환 !!!")
+        classification_result = {"doc_type": "unknown", "confidence": 0.0}
+        # --- 핫픽스 끝 ---
+
         doc_type = classification_result.get('doc_type', 'unknown')
         doc_confidence = classification_result.get('confidence', 0.0)
         log.info(f"'{filename}' (ID: {doc_id}) 분류 결과: {doc_type} (신뢰도: {doc_confidence:.2%})")

@@ -6,7 +6,6 @@ services:
       - "8000:8000"
     environment:
       - PYTHONPATH=/usr/src
-      # === 🧠 수정: app/config.py에서 사용할 모델 이름을 주입 ===
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
@@ -19,8 +18,8 @@ services:
         condition: service_started
       celery-worker:
         condition: service_started
-      ollama: # <-- ollama 의존성
-        condition: service_started
+      ollama:
+        condition: service_healthy
     restart: unless-stopped
 
   redis:
@@ -42,18 +41,15 @@ services:
     container_name: celery-worker
     environment:
       - PYTHONPATH=/usr/src
-      # === 🧠 수정: app/config.py에서 사용할 모델 이름을 주입 ===
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
-      # (만약 classification_module.py에서 사용한다면)
-      # - MODEL_PATH=models/classifier
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
-      ollama: # <-- ollama 의존성
-        condition: service_started
+      ollama:
+        condition: service_healthy
     restart: unless-stopped
 
   meilisearch:
@@ -98,18 +94,21 @@ services:
       - redis
     restart: unless-stopped
 
-  # === 🧠 수정: 'image: ...' 대신 'build: ./ollama' 사용 ===
   ollama:
-    build: ./ollama
+    image: ollama/ollama:latest
     container_name: ollama
     ports:
       - "11434:11434"
     volumes:
-      - ollama_data:/root/.ollama
+      - 'C:\Users\김주영\.ollama:/root/.ollama'
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
 volumes:
   redis_data:
   meili_data:
   qdrant_data:
-  ollama_data:
