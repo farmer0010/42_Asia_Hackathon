@@ -1,4 +1,5 @@
 import httpx
+from typing import List
 
 class LLMClient:
     def __init__(self, model="gemma3:4b", base="http://localhost:11434"):

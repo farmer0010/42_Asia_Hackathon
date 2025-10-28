@@ -6,8 +6,10 @@ services:
       - "8000:8000"
     environment:
       - PYTHONPATH=/usr/src
+      # === 🧠 수정: app/config.py에서 사용할 모델 이름을 주입 ===
       - OLLAMA_BASE_URL=http://ollama:11434
-      - LLM_MODEL_NAME=gemma3:4b
+      - LLM_MODEL_NAME=gemma3-custom
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
     depends_on:
       redis:
         condition: service_healthy
@@ -17,7 +19,7 @@ services:
         condition: service_started
       celery-worker:
         condition: service_started
-      ollama:
+      ollama: # <-- ollama 의존성
         condition: service_started
     restart: unless-stopped
 
@@ -40,13 +42,17 @@ services:
     container_name: celery-worker
     environment:
       - PYTHONPATH=/usr/src
+      # === 🧠 수정: app/config.py에서 사용할 모델 이름을 주입 ===
       - OLLAMA_BASE_URL=http://ollama:11434
-      - LLM_MODEL_NAME=gemma3:4b
+      - LLM_MODEL_NAME=gemma3-custom
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
+      # (만약 classification_module.py에서 사용한다면)
+      # - MODEL_PATH=models/classifier
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
-      ollama:
+      ollama: # <-- ollama 의존성
         condition: service_started
     restart: unless-stopped
 
@@ -92,8 +98,9 @@ services:
       - redis
     restart: unless-stopped
 
+  # === 🧠 수정: 'image: ...' 대신 'build: ./ollama' 사용 ===
   ollama:
-    image: ollama/ollama:latest
+    build: ./ollama
     container_name: ollama
     ports:
       - "11434:11434"

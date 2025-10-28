@@ -14,10 +14,10 @@ class Settings:
 
     # LLM 설정
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
-    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gemma3:4b") # 생성(추출,요약)용 모델
+    LLM_MODEL_NAME: str = os.getenv("LLM_MODEL_NAME", "gemma3-custom") # 'gemma3:4b' -> 'gemma3-custom'
 
     # 시맨틱 검색 설정 추가
-    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "mxbai-embed-large") # 임베딩(검색)용 모델
+    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "mxbai-embed-large-custom") # 'mxbai-embed-large' -> 'mxbai-embed-large-custom'
     VECTOR_DIMENSION: int = int(os.getenv("VECTOR_DIMENSION", 1024)) # mxbai-embed-large의 차원
 
 
