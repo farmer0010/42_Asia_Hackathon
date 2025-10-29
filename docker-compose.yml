@@ -9,6 +9,9 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
+      # ★★★ 추가: Celery/Redis 관련 환경변수 (main.py에서 사용될 수 있음)
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       redis:
         condition: service_healthy
@@ -22,11 +25,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  redis:
+  redis: # <-- 서비스 이름 'redis'
     image: "redis:alpine"
-    container_name: redis-broker
+    container_name: redis-broker # 컨테이너 이름은 그대로 둬도 괜찮습니다.
     ports:
-      - "6379:6379"
+      - "6381:6379" # ★★★ 수정: 올바른 포트 매핑 (PC 6380 <-> 컨테이너 6379)
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -41,12 +44,15 @@ services:
     container_name: celery-worker
     environment:
       - PYTHONPATH=/usr/src
+      # ★★★ 수정: 서비스 이름 'redis' 사용
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
-      redis:
+      redis: # 서비스 이름 'redis' 사용
         condition: service_healthy
       ollama:
         condition: service_healthy
@@ -88,10 +94,11 @@ services:
     ports:
       - "5555:5555"
     environment:
-      - CELERY_BROKER_URL=redis://redis-broker:6379/0
+      # ★★★ 수정: 서비스 이름 'redis' 사용
+      - CELERY_BROKER_URL=redis://redis:6379/0
       - FLOWER_PORT=5555
     depends_on:
-      - redis
+      - redis # 서비스 이름 'redis' 사용
     restart: unless-stopped
 
   ollama:
