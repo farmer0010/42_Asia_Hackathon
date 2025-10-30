@@ -6,12 +6,14 @@ services:
       - "8000:8000"
     environment:
       - PYTHONPATH=/usr/src
+      - REDIS_BROKER_URL=redis://redis:6379/0
+      - MEILI_HOST_URL=http://meilisearch:7700
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
-      # ★★★ 추가: Celery/Redis 관련 환경변수 (main.py에서 사용될 수 있음)
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - VECTOR_DIMENSION=1024
     depends_on:
       redis:
         condition: service_healthy
@@ -25,34 +27,38 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  redis: # <-- 서비스 이름 'redis'
+  redis:
     image: "redis:alpine"
-    container_name: redis-broker # 컨테이너 이름은 그대로 둬도 괜찮습니다.
-    ports:
-      - "6381:6379" # ★★★ 수정: 올바른 포트 매핑 (PC 6380 <-> 컨테이너 6379)
+    container_name: redis-broker
+    # ★★★ 수정: 포트와 볼륨을 모두 제거하여 권한 문제 원천 차단 ★★★
+    # ports:
+    #   - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
-    volumes:
-      - redis_data:/data
+    # volumes:
+    #  - redis_data:/data
     restart: unless-stopped
+    # ★★★ 수정 완료 ★★★
 
   celery-worker:
     build: .
     container_name: celery-worker
     environment:
       - PYTHONPATH=/usr/src
-      # ★★★ 수정: 서비스 이름 'redis' 사용
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_BROKER_URL=redis://redis:6379/0
+      - MEILI_HOST_URL=http://meilisearch:7700
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
       - OLLAMA_BASE_URL=http://ollama:11434
       - LLM_MODEL_NAME=gemma3-custom
       - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
+      - VECTOR_DIMENSION=1024
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
-      redis: # 서비스 이름 'redis' 사용
+      redis:
         condition: service_healthy
       ollama:
         condition: service_healthy
@@ -94,11 +100,10 @@ services:
     ports:
       - "5555:5555"
     environment:
-      # ★★★ 수정: 서비스 이름 'redis' 사용
       - CELERY_BROKER_URL=redis://redis:6379/0
       - FLOWER_PORT=5555
     depends_on:
-      - redis # 서비스 이름 'redis' 사용
+      - redis
     restart: unless-stopped
 
   ollama:
@@ -116,6 +121,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  redis_data:
+  # redis_data: <-- redis 볼륨을 안 쓰니 이것도 제거
   meili_data:
   qdrant_data:
