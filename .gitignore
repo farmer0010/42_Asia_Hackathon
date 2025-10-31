@@ -1,1 +1,43 @@
+# macOS
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Model files
+models/*.pth
+models/*.pt
+models/*.bin
+
+# Output files (선택적 - 필요시 주석 해제)
+# outputs/*.json
+# outputs/*.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
