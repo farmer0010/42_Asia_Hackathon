@@ -1,0 +1,1 @@
+paddlepaddle==2.6.1; platform_system == "Darwin" and python_version < "3.12"

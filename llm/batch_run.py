@@ -8,10 +8,16 @@ from typing import Optional, Tuple, Dict, Any, List
 from client import LLMClient
 from tasks import classify, extract_structured, summarize, detect_pii
 
+# ---- base dir (llm/) ----
+BASE = Path(__file__).resolve().parent
+SCHEMAS = BASE / "schemas"
 
 # ----------------------------- utils -----------------------------
-def load_schema(p: str) -> dict:
-    return json.loads(Path(p).read_text(encoding="utf-8"))
+def load_schema(p: str | Path) -> dict:
+    p = Path(p)
+    if not p.is_absolute():
+        p = SCHEMAS / p
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def build_final_json(
@@ -36,21 +42,18 @@ def build_final_json(
 
 
 def _safe_name(name: str) -> str:
-    """파일/디렉토리 안전 이름으로 정규화 (확장자 포함)"""
-    s = Path(name).name  # 경로 제거
+    s = Path(name).name
     s = re.sub(r"[^A-Za-z0-9._-]+", "_", s)
     return s or "document.txt"
 
 
 def _safe_stem(name: str) -> str:
-    """확장자 제외 파일명 스템만 안전 처리"""
     stem = Path(name).stem
     stem = re.sub(r"[^A-Za-z0-9._-]+", "_", stem)
     return stem or "document"
 
 
 def _ensure_unique_dir(base: Path) -> Path:
-    """이미 존재하면 _2, _3… 식으로 디렉토리명 유니크 보장"""
     if not base.exists():
         return base
     i = 2
@@ -63,16 +66,9 @@ def _ensure_unique_dir(base: Path) -> Path:
 
 def load_input(path: str) -> Tuple[str, Any]:
     """
-    입력 자동 인식:
     - JSON(dict): {"filename": "...", "full_text_ocr": "...", "classification": {...}}
     - JSON(list): [{"filename":..., "full_text_ocr":...}, ...]
-    - 텍스트: ocr.txt로 간주
-
-    반환:
-      ("single", (full_text:str, meta:dict))
-      ("batch",  [(full_text:str, meta:dict), ...])
-
-    meta = {"filename": str|None, "classification": dict|None}
+    - TEXT: ocr.txt 로 간주
     """
     p = Path(path)
     if p.suffix.lower() == ".json":
@@ -99,7 +95,6 @@ def load_input(path: str) -> Tuple[str, Any]:
         else:
             raise ValueError("JSON must be an object or an array.")
     else:
-        # 일반 텍스트 파일
         text = p.read_text(encoding="utf-8", errors="ignore")
         meta = {"filename": p.name, "classification": None}
         return "single", (text, meta)
@@ -113,14 +108,11 @@ async def process_one_item(
     llm: LLMClient,
     schema_map: Dict[str, dict],
 ):
-    # 1) 분류 (meta에 있으면 우선 사용)
-    if meta.get("classification"):
-        cls = meta["classification"]
-    else:
-        cls = await classify(full_text, llm)
+    # 1) 분류 (meta 우선)
+    cls = meta.get("classification") or await classify(full_text, llm)
     doc_type = cls.get("doc_type", "report")
 
-    # 2) 구조화 추출 (타입별 스키마/프롬프트 내부에서 처리)
+    # 2) 구조화 추출
     extracted = await extract_structured(full_text, llm, doc_type, schema_map) or {}
 
     # 3) 요약
@@ -129,16 +121,14 @@ async def process_one_item(
     # 4) PII
     pii = await detect_pii(full_text, llm)
 
-    # 5) 파일명/출력 디렉토리: **원본 filename 사용**
-    #    - JSON의 filename 우선, 없으면 "document.txt"
+    # 5) 파일명/출력 디렉토리: 원본 filename 사용
     raw_filename = meta.get("filename") or "document.txt"
-    safe_filename = _safe_name(raw_filename)         # 예: invoice_123.pdf
-    folder_name = _safe_stem(safe_filename)          # 예: invoice_123
-    sub = out_dir / folder_name
-    sub = _ensure_unique_dir(sub)
+    safe_filename = _safe_name(raw_filename)
+    folder_name = _safe_stem(safe_filename)
+    sub = _ensure_unique_dir(out_dir / folder_name)
     sub.mkdir(parents=True, exist_ok=True)
 
-    # 6) 최종 JSON (filename 필드에도 원본 파일명 반영)
+    # 6) 최종 JSON
     final_json = build_final_json(
         filename=safe_filename,
         classification=cls,
@@ -159,7 +149,7 @@ async def process_one_item(
 async def process(
     input_path: str,
     out_dir: str,
-    doc_filename_or_path: Optional[str],  # 유지하지만 사용 안 함
+    doc_filename_or_path: Optional[str],  # 호환성 유지
     model_name: str = "gemma3:4b",
 ):
     mode, payload = load_input(input_path)
@@ -167,14 +157,14 @@ async def process(
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    # LLM & schemas
+    # LLM & schemas (항상 llm/ 아래에서 로드)
     llm = LLMClient(model=model_name)
     schema_map = {
-        "invoice":  load_schema("schemas/invoice_v1.json"),
-        "receipt":  load_schema("schemas/receipt_v1.json"),
-        "report":   load_schema("schemas/report_v1.json"),
-        "resume":   load_schema("schemas/resume_v1.json"),
-        "contract": load_schema("schemas/contract_v1.json"),
+        "invoice":  load_schema("invoice_v1.json"),
+        "receipt":  load_schema("receipt_v1.json"),
+        "report":   load_schema("report_v1.json"),
+        "resume":   load_schema("resume_v1.json"),
+        "contract": load_schema("contract_v1.json"),
     }
 
     if mode == "single":
@@ -187,7 +177,6 @@ async def process(
             schema_map=schema_map,
         )
     else:
-        # batch
         items: List[Tuple[str, Dict[str, Any]]] = payload  # type: ignore
         for full_text, meta in items:
             await process_one_item(
@@ -203,11 +192,7 @@ async def process(
 def parse_args(argv):
     """
     Usage:
-      # 텍스트 입력
-      python3 batch_run.py <ocr.txt> <output_dir> [doc_filename_or_path] [model]
-
-      # JSON 입력 (dict 또는 list)
-      python3 batch_run.py <input.json> <output_dir> [doc_filename_or_path] [model]
+      python3 llm/batch_run.py <ocr.txt|input.json> <output_dir> [doc_filename_or_path] [model]
     """
     if len(argv) < 3:
         print(parse_args.__doc__)
@@ -215,7 +200,7 @@ def parse_args(argv):
 
     inp = argv[1]
     out_dir = argv[2]
-    doc_hint = None  # 유지만 함
+    doc_hint = None
     model = "gemma3:4b"
 
     if len(argv) >= 4:
