@@ -1,0 +1,20 @@
+{
+  "filename": "sample1.jpg",
+  "classification": {
+    "doc_type": "invoice",
+    "confidence": 0.687
+  },
+  "full_text_ocr": "Commercial Invoice\nInvoice Number:\nC12023-001\nInvoice Date:\nSeptember 30.2030\nExporter Information\nImporter Information\nCompany Name:ABC Exports Ltd.\nConsignee Name:XYZ Importers Inc.\nCompany Address:123 Exporter Street,Export City\nConsignee Address:456 Importer Street,Import City\nPhone Number:123456-7890\nDestination Country:Important\nEmail: info@abcexports.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):$13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBank Account Number:1234-5678-9012-3456\nPayee Name:ABC Exports Ltd.\nDate:September 30,2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nXYZ Importers Inc.",
+  "extracted_data": {},
+  "summary": "ABC Exports Ltd. issued invoice C12023-001 on September 30, 2030, for $13,000.00 USD in goods totaling $13,500.00 USD, with a due date of October 15, 2030.",
+  "pii_detected": [
+    {
+      "type": "EMAIL",
+      "text": "info@abcexports.com"
+    },
+    {
+      "type": "PHONE",
+      "text": "123456-7890"
+    }
+  ]
+}

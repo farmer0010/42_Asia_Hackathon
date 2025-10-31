@@ -1,0 +1,56 @@
+Commercial Invoice
+Invoice Number:
+C12023-001
+Invoice Date:
+September 30.2030
+Exporter Information
+Importer Information
+Company Name:ABC Exports Ltd.
+Consignee Name:XYZ Importers Inc.
+Company Address:123 Exporter Street,Export City
+Consignee Address:456 Importer Street,Import City
+Phone Number:123456-7890
+Destination Country:Important
+Email: info@abcexports.com
+Customs Declaration Number:CDN-2023-001
+Item Details:
+No
+Description of Goods
+Quantity
+Unit Price
+Total
+1
+Widget Model X
+500
+$10.00
+$5,000.00
+2
+Gadget Model Y
+300
+$15.00
+$4,500.00
+Gizmo Model Z
+200
+$20.00
+$4,000.00
+Currency:USD
+Sub Total:
+$13,500.00
+Exchange Rate:1.00
+Tax:
+$1,000.00
+Total Amount Due (In USD):$13,000.00
+Shipping Charges:
+$500.00
+Total:
+$13,000.00
+Payment Method:
+Payment Method:Wire Transfer
+Bank Account Number:1234-5678-9012-3456
+Payee Name:ABC Exports Ltd.
+Date:September 30,2030
+Additional Notes:
+Exporter Notes:Please handle with care during shipping.
+Shipping Date:September 30,2030 Payment
+Due Date:October 15,2030
+XYZ Importers Inc.

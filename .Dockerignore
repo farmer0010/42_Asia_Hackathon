@@ -1,0 +1,27 @@
+.venv
+venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.tmp
+*.swp
+.cache/
+.cache/huggingface/*
+!.cache/huggingface/.gitkeep
+
+# 런타임 결과물은 마운트로 공유
+outputs/
+real_outputs/
+
+# VCS/IDE
+.git
+.gitignore
+.vscode/
+.idea/
+
+# 대형 모델/체크포인트/가중치
+*.safetensors
+*.pt
+*.bin

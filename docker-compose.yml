@@ -1,0 +1,64 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "/bin/sh", "-lc", "ollama list >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  # gemma3:4b 모델 1회성 다운로드
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ollama pull gemma3:4b
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 42_asia_hackathon-app:latest
+    container_name: asia-ocr-app
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONUNBUFFERED=1
+      - TOKENIZERS_PARALLELISM=false
+      - HF_HOME=/app/.cache/huggingface
+    working_dir: /app
+    volumes:
+      - ./test_samples:/app/test_samples
+      - ./outputs:/app/outputs
+      - ./real_outputs:/app/real_outputs
+      - ./.cache/huggingface:/app/.cache/huggingface
+    restart: "no"
+    command: >
+      bash -lc '
+        until curl -sf ${OLLAMA_HOST:-http://ollama:11434}/api/tags >/dev/null; do
+          echo "[app] waiting ollama...";
+          sleep 2;
+        done;
+        bash start.sh
+      '
+
+volumes:
+  ollama_models:
