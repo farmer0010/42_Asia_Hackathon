@@ -1,0 +1,12 @@
+System: Extract report fields as JSON:
+{
+  "title": "string or null",
+  "date": "YYYY-MM-DD or null",
+  "key_points": ["string", "..."]  // up to 5 bullets
+}
+Rules:
+- Return ONLY JSON (no comments/markdown).
+- key_points: array of 1~5 concise bullets (no line breaks inside each).
+- Use null if not found.
+Text:
+{TEXT}
