@@ -7,10 +7,7 @@
       "doc_type": "receipt",
       "confidence": 0.4634
     },
-    "extracted_data": {
-      "store": "Receipt",
-      "date": "01-01-2018"
-    },
+    "extracted_data": {},
     "processing_time": 2.5992519855499268
   },
   {
@@ -21,11 +18,7 @@
       "doc_type": "invoice",
       "confidence": 0.687
     },
-    "extracted_data": {
-      "vendor": "Information\nImporter Information\nCompany Name",
-      "total_amount": 1.0,
-      "currency": "USD"
-    },
+    "extracted_data": {},
     "processing_time": 5.459744930267334
   },
   {
@@ -36,9 +29,7 @@
       "doc_type": "invoice",
       "confidence": 0.3679
     },
-    "extracted_data": {
-      "currency": "USD"
-    },
+    "extracted_data": {},
     "processing_time": 2.200388193130493
   },
   {
@@ -71,10 +62,7 @@
       "doc_type": "invoice",
       "confidence": 0.4519
     },
-    "extracted_data": {
-      "total_amount": 8000.0,
-      "currency": "USD"
-    },
+    "extracted_data": {},
     "processing_time": 5.454148054122925
   }
 ]
