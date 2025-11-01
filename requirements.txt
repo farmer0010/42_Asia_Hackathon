@@ -1,13 +1,26 @@
+# OCR & Vision
 paddlepaddle>=2.5.0
 paddleocr==2.8.1
 opencv-python==4.10.0.84
 pillow==11.0.0
 pdf2image==1.17.0
+
+# Deep Learning
 torch==2.9.0
 torchvision==0.24.0
+
+# NLP & ML
 transformers==4.46.3
 datasets==3.2.0
 scikit-learn==1.6.0
-tqdm==4.67.1
 numpy==1.26.4
 pandas==2.2.3
+
+# LLM API
+anthropic>=0.25.0
+# openai>=1.0.0  # Alternative to Anthropic
+
+# Utils
+tqdm==4.67.1
+psutil
+python-dotenv
