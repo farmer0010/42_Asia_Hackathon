@@ -1,127 +1,94 @@
-# src/ocr_module.py
-
 from paddleocr import PaddleOCR
 import cv2
 import numpy as np
 from pathlib import Path
 import time
 import logging
-import os  # pdf2image 임시 폴더용
+from pdf2image import convert_from_path
+import torch
 
-log = logging.getLogger(__name__)
+# Loguru 로거 설정 (worker.py와 동일한 로거 사용)
+log = logging.getLogger("uvicorn")
 
 
 class OCRModule:
+    """
+    [최신 모듈] PaddleOCR을 사용하여 텍스트를 추출합니다.
+    (당신이 제공한 코드를 기반으로 작성됨)
+    """
 
     def __init__(self, lang='en', use_gpu=False):
-        log.info(f"Initializing OCR module (language: {lang})...")
+        log.info(f"Initializing OCR module (PaddleOCR, language: {lang}, GPU: {use_gpu})...")
+        try:
+            self.ocr = PaddleOCR(
+                use_angle_cls=False,
+                lang=lang,
+                use_gpu=use_gpu,
+                show_log=False
+            )
+            log.info("OCR module (PaddleOCR) ready.")
+        except Exception as e:
+            log.error(f"Failed to initialize PaddleOCR: {e}", exc_info=True)
+            self.ocr = None
 
-        self.ocr = PaddleOCR(
-            use_angle_cls=False,
-            lang=lang,
-            use_gpu=use_gpu,
-            show_log=False
-        )
-
-        log.info("OCR module ready.")
-
-    def preprocess_image(self, image_path):
+    def _preprocess_image(self, image_path: str):
         img = cv2.imread(str(image_path))
 
         if img is None:
             raise ValueError(f"Failed to load image: {image_path}")
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
         denoised = cv2.fastNlMeansDenoising(gray, h=10)
-
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         enhanced = clahe.apply(denoised)
 
         return enhanced
 
-    def extract_text(self, file_path):
+    def _pdf_to_image(self, pdf_path: str) -> str:
+        """(first page only)"""
+        images = convert_from_path(pdf_path, first_page=1, last_page=1)
+        temp_dir = Path("/tmp/ocr_cache")
+        temp_dir.mkdir(exist_ok=True)
+        temp_path = temp_dir / f"{Path(pdf_path).stem}.png"
+        images[0].save(str(temp_path), 'PNG')
+        return str(temp_path)
 
-        start_time = time.time()
+    def perform_ocr(self, file_path: str) -> str:
+        """
+        [수정] Celery worker.py와 연동하기 위한 메인 함수.
+        성공 시 텍스트 문자열(str)을, 실패 시 빈 문자열("")을 반환합니다.
+        """
+        if self.ocr is None:
+            log.error("PaddleOCR is not initialized. OCR failed.")
+            return ""
 
         try:
-            # PDF 파일인 경우, 이미지로 먼저 변환
+            image_to_process = file_path
+
+            # PDF 파일인 경우 이미지로 변환
             if Path(file_path).suffix.lower() == '.pdf':
-                log.info(f"Converting PDF to image: {file_path}")
-                file_path = self._pdf_to_image(file_path)
-                log.info(f"Converted PDF to image at: {file_path}")
+                log.debug(f"Converting PDF to image: {file_path}")
+                image_to_process = self._pdf_to_image(file_path)
 
-            # PaddleOCR은 전처리된 이미지보다 원본에서 더 잘 동작할 수 있습니다.
-            # 원본 이미지 경로를 직접 사용합니다.
-            # img = self.preprocess_image(file_path) 
+            # 이미지 전처리
+            log.debug(f"Preprocessing image: {image_to_process}")
+            img = self._preprocess_image(image_to_process)
 
-            result = self.ocr.ocr(str(file_path), cls=False)
+            # OCR 수행
+            log.debug("Performing PaddleOCR...")
+            result = self.ocr.ocr(img, cls=False)
 
             if not result or not result[0]:
                 log.warning(f"No text detected in {file_path}")
-                return {
-                    'text': '',
-                    'confidence': 0.0,
-                    'processing_time': time.time() - start_time,
-                    'error': 'No text detected'
-                }
+                return ""
 
             lines = []
-            confidences = []
-
             for line in result[0]:
                 bbox, (text, conf) = line
                 lines.append(text)
-                confidences.append(conf)
 
-            full_text = '\n'.join(lines)
-            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
-
-            log.info(f"OCR successful for {file_path}. Length: {len(full_text)}, Confidence: {avg_confidence:.2%}")
-
-            return {
-                'text': full_text,
-                'confidence': avg_confidence,
-                'processing_time': time.time() - start_time
-            }
+            return '\n'.join(lines)
 
         except Exception as e:
-            log.error(f"OCR processing failed for {file_path}. Error: {e}", exc_info=True)
-            return {
-                'text': '',
-                'confidence': 0.0,
-                'processing_time': time.time() - start_time,
-                'error': str(e)
-            }
-        finally:
-            # PDF에서 변환된 임시 이미지 파일인 경우 삭제
-            if 'temp_image_path' in locals() and os.path.exists(temp_image_path):
-                os.remove(temp_image_path)
-                log.info(f"Removed temp image: {temp_image_path}")
-
-    def _pdf_to_image(self, pdf_path):
-        """(first page only)"""
-        from pdf2image import convert_from_path
-
-        # PDF를 /tmp 임시 폴더에 고유한 이름의 이미지로 변환
-        temp_image_dir = Path("/tmp/pdf_images")
-        temp_image_dir.mkdir(parents=True, exist_ok=True)
-
-        # 고유한 파일 이름 생성 (worker.py에서 생성한 이름을 그대로 사용)
-        pdf_stem = Path(pdf_path).stem
-        temp_image_path = temp_image_dir / f"{pdf_stem}.png"
-
-        images = convert_from_path(
-            pdf_path,
-            first_page=1,
-            last_page=1,
-            output_folder=temp_image_dir,
-            output_file=pdf_stem,
-            fmt='png'
-        )
-
-        if images and os.path.exists(temp_image_path):
-            return str(temp_image_path.resolve())
-        else:
-            log.error(f"PDF to image conversion failed for: {pdf_path}")
-            raise Exception("PDF to image conversion failed")
+            log.error(f"Error during PaddleOCR processing for {file_path}: {e}", exc_info=True)
+            return ""  # 실패 시 빈 문자열 반환

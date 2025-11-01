@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": [
+    "parties",
+    "effective_date",
+    "end_date",
+    "total_value",
+    "currency",
+    "governing_law"
+  ],
+  "properties": {
+    "parties": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 5
+    },
+    "effective_date": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "end_date": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "total_value": { "type": ["number", "null"] },
+    "currency": { "type": ["string", "null"] },
+    "governing_law": { "type": ["string", "null"] }
+  }
+}

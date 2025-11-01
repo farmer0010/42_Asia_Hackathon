@@ -11,3 +11,6 @@ qdrant_storage/
 # AI 모델 및 캐시
 models/
 models/.cache/
+
+# Ollama (더 이상 사용 안 함)
+ollama/

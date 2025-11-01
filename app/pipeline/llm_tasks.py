@@ -1,96 +1,137 @@
+import os
 import json
-import pathlib
-import re
-from json import loads
-from typing import List
+from functools import lru_cache, partial
+from typing import Dict, Any, Callable
+import requests
 
-from .client import LLMClient
-from .guards import guarded_json
+from .guards import parse_json_from_llm
+from ..config import settings
+from ..logger_config import setup_logging
 
-def read(p: str) -> str:
-    return pathlib.Path(p).read_text(encoding="utf-8")
+log = setup_logging()
 
-def fill(tpl: str, text: str) -> str:
-    return tpl.replace("{{TEXT}}", text).replace("{TEXT}", text)
 
-def heuristic_classify(text: str):
-    t = text.lower()
-    invoice_hits = any(k in t for k in ["invoice", "bill to", "invoice date", "subtotal", "tax invoice"])
-    receipt_hits = any(k in t for k in ["receipt", "thank you for your purchase", "cashier", "pos", "change"])
-    report_hits  = any(k in t for k in ["report", "executive summary", "introduction", "conclusion"])
-
-    if invoice_hits and not receipt_hits:
-        return {"doc_type": "invoice", "confidence": 0.80}
-    if receipt_hits and not invoice_hits:
-        return {"doc_type": "receipt", "confidence": 0.75}
-    if report_hits:
-        return {"doc_type": "report", "confidence": 0.70}
-
-    money = len(re.findall(r"\b\d{1,3}(?:[,\s]\d{3})*(?:\.\d+)?\s?(?:usd|thb|krw|jpy|eur|\$)", t))
-    if money >= 2:
-        return {"doc_type": "invoice", "confidence": 0.65}
-
-    return {"doc_type": "report", "confidence": 0.60}
-
-async def classify(text: str, llm: LLMClient):
-    prompt = read("app/pipeline/prompts/classify.txt")
-    out = await llm.generate(fill(prompt, text), max_tokens=220, temperature=0.0)
+# --- 프롬프트/스키마 로드 헬퍼 ---
+@lru_cache(maxsize=32)
+def load_asset(file_path: str) -> str:
+    """
+    ./prompts 또는 ./schemas 디렉토리에서 파일을 로드합니다.
+    (llm/tasks.py 와 동일한 로직)
+    """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(base_dir, file_path)
     try:
-        obj = loads(out)
-        if not isinstance(obj, dict) or "doc_type" not in obj:
-            raise ValueError("bad json")
-        conf = float(obj.get("confidence", 0.0))
-        if conf < 0.60:
-            return heuristic_classify(text)
-        return obj
-    except Exception:
-        return heuristic_classify(text)
+        with open(full_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        log.error(f"Failed to load asset {full_path}: {e}")
+        raise
 
-async def extract_invoice(text: str, llm: LLMClient, schema: dict):
-    tpl = read("app/pipeline/prompts/extract_invoice.txt")
-    return await guarded_json(llm, fill(tpl, text), schema)
 
-async def extract_receipt(text: str, llm: LLMClient, schema: dict):
-    tpl = read("app/pipeline/prompts/extract_receipt.txt")
-    return await guarded_json(llm, fill(tpl, text), schema)
+# --- LLM API 호출 ---
+def call_llm(system_prompt: str, user_prompt: str, schema: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Shimmy LLM 서버에 JSON 모드로 요청을 보냅니다.
+    (llm/client.py 로직을 통합)
+    """
+    url = f"{settings.LLM_API_BASE_URL}/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "model": settings.LLM_MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.1,
+        "response_format": {
+            "type": "json_object",
+            "schema": schema
+        }
+    }
 
-async def summarize(text: str, llm: LLMClient):
-    tpl = read("app/pipeline/prompts/summarize.txt")
-    s = await llm.generate(fill(tpl, text), max_tokens=200, temperature=0.0)
-    return s.replace("\n", " ").strip()
-
-def regex_pii(text: str):
-    found = []
-    for m in re.finditer(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", text):
-        found.append({"type": "EMAIL", "text": m.group(0)})
-    for m in re.finditer(r"\+?\d[\d\s\-]{7,}\d", text):
-        found.append({"type": "PHONE", "text": m.group(0)})
-    for m in re.finditer(r"\b\d-\d{4}-\d{5}-\d{2}-\d\b", text):
-        found.append({"type": "THAI_ID", "text": m.group(0)})
-    return found
-
-async def detect_pii(text: str, llm: LLMClient):
-    tpl = read("app/pipeline/prompts/pii.txt")
-    out = await llm.generate(fill(tpl, text), max_tokens=400, temperature=0.0)
-    llm_list = []
     try:
-        llm_list = loads(out) if out.strip().startswith("[") else []
-    except Exception:
-        llm_list = []
-    regex_list = regex_pii(text)
-    seen = set()
-    merged = []
-    for item in (llm_list + regex_list):
-        k = (item.get("type", ""), item.get("text", ""))
-        if k not in seen:
-            seen.add(k)
-            merged.append(item)
-    return merged
+        log.debug(f"Calling LLM API at {url} with model {settings.LLM_MODEL_NAME}")
+        response = requests.post(url, headers=headers, json=payload, timeout=settings.LLM_TIMEOUT)
+        response.raise_for_status()
 
-# === 임베딩 작업 함수 추가 ===
-async def get_embedding(text: str, llm: LLMClient, model_name: str) -> List[float]:
-    """텍스트를 받아 임베딩 벡터를 반환합니다."""
-    safe_text = (text or "")[:4096]
-    if not safe_text:
-        return []
-    return await llm.embed(safe_text, model_name)
+        data = response.json()
+        raw_json_str = data.get("choices", [{}])[0].get("message", {}).get("content", "{}")
+
+        # LLM이 스키마를 따르지 않을 경우를 대비한 가드
+        parsed_json = parse_json_from_llm(raw_json_str, schema)
+        return parsed_json
+
+    except requests.exceptions.Timeout:
+        log.error(f"LLM API request timed out after {settings.LLM_TIMEOUT}s")
+        return {"error": "LLM request timed out"}
+    except requests.exceptions.RequestException as e:
+        log.error(f"LLM API request failed: {e}")
+        return {"error": f"LLM API request failed: {e}"}
+    except Exception as e:
+        log.error(f"Failed to parse LLM response: {e}")
+        return {"error": f"Failed to parse LLM response: {e}"}
+
+
+# --- 태스크 정의 ---
+
+def extract_invoice_data(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/extract_invoice.txt")
+    schema = json.loads(load_asset("schemas/invoice_v1.json"))
+    return call_llm(system_prompt, text, schema)
+
+
+def extract_receipt_data(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/extract_receipt.txt")
+    schema = json.loads(load_asset("schemas/receipt_v1.json"))
+    return call_llm(system_prompt, text, schema)
+
+
+# ◀◀◀ [추가] ocr/llm/tasks.py 에서 가져온 기능 ◀◀◀
+def extract_contract_data(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/extract_contract.txt")
+    schema = json.loads(load_asset("schemas/contract_v1.json"))
+    return call_llm(system_prompt, text, schema)
+
+
+def extract_report_data(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/extract_report.txt")
+    schema = json.loads(load_asset("schemas/report_v1.json"))
+    return call_llm(system_prompt, text, schema)
+
+
+def extract_resume_data(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/extract_resume.txt")
+    schema = json.loads(load_asset("schemas/resume_v1.json"))
+    return call_llm(system_prompt, text, schema)
+
+
+# ◀◀◀ [추가 완료] ◀◀◀
+
+def perform_pii_masking(text: str) -> Dict[str, Any]:
+    system_prompt = load_asset("prompts/pii.txt")
+    # PII는 스키마가 없으므로(자유 형식), 기본 JSON 스키마 사용
+    schema = {"type": "object", "properties": {"pii_detected": {"type": "array", "items": {"type": "object"}}}}
+    log.warning("PII Masking is using general JSON mode. Review prompt for optimal output.")
+    return call_llm(system_prompt, text, schema)
+
+
+def perform_summarization(text: str) -> str:
+    system_prompt = load_asset("prompts/summarize.txt")
+    schema = {"type": "object", "properties": {"summary": {"type": "string"}}}
+
+    result = call_llm(system_prompt, text, schema)
+    return result.get("summary", "Summary generation failed.")
+
+
+# --- 태스크 매핑 ---
+EXTRACTION_TASKS: Dict[str, Callable[[str], Dict[str, Any]]] = {
+    "invoice": extract_invoice_data,
+    "receipt": extract_receipt_data,
+    "contract": extract_contract_data,  # ◀◀◀ [추가]
+    "report": extract_report_data,  # ◀◀◀ [추가]
+    "resume": extract_resume_data,  # ◀◀◀ [추가]
+}
+
+
+def get_llm_extraction_task(doc_type: str) -> Optional[Callable[[str], Dict[str, Any]]]:
+    return EXTRACTION_TASKS.get(doc_type)

@@ -1,196 +1,94 @@
-from transformers import (
-    DistilBertForSequenceClassification,
-    DistilBertTokenizer,
-    Trainer,
-    TrainingArguments,
-)
-from datasets import Dataset
-import pandas as pd
-import json
+import os
 import torch
+from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
+from torch.nn.functional import softmax
 import logging
+from typing import Dict, Any
 
-log = logging.getLogger(__name__)
+# Loguru 로거 설정 (worker.py와 동일한 로거 사용)
+log = logging.getLogger("uvicorn")
 
 
 class DocumentClassifier:
-    def __init__(self, model_name='distilbert-base-uncased'):
-        self.model_name = model_name
-        self.tokenizer = DistilBertTokenizer.from_pretrained(model_name)  # 텍스트를 숫자로
-        self.labels = ['invoice', 'receipt', 'resume', 'report', 'contract']  # 기본값
-        self.label_to_id = {label: i for i, label in enumerate(self.labels)}
-        self.id_to_label = {i: label for i, label in enumerate(self.labels)}
+    """
+    [진짜 모듈] DistilBERT 모델을 사용하여 문서 텍스트를 분류합니다.
+    (원본: ocr/src/classification_module.py)
+
+    [수정] "데모 모드" 로직 추가
+    모델 파일이 없어도 (training_set이 없어도) 크래시나지 않고,
+    파일명을 기반으로 임시 분류를 수행합니다.
+    """
+
+    def __init__(self, model_path: str = None):
         self.model = None
+        self.tokenizer = None
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # [수정] ocr/llm 폴더 기준 5개 클래스
+        self.label_map = {0: 'invoice', 1: 'receipt', 2: 'contract', 3: 'report', 4: 'resume'}
+        self.is_model_loaded = False  # ◀◀◀ [데모 모드] 플래그
 
-    def train(self, labels_csv_path, ocr_results_path, output_dir='models/classifier'):
-        log.info("Training Classification Model")
+        if model_path:
+            self.load_model(model_path)
 
-        # Step 1: 데이터 로드
-        log.info("\nStep 1: Loading data...")
-        df = pd.read_csv(labels_csv_path)
+    def load_model(self, model_path: str):
+        """
+        지정된 경로에서 훈련된 모델과 토크나이저를 로드합니다.
+        [수정] 모델이 없어도 크래시 나지 않도록 try-except 추가
+        """
+        try:
+            if not os.path.exists(model_path):
+                log.warning(f"Model path not found: {model_path}")
+                log.warning("!!! RUNNING IN 'DEMO MODE'. Classification will be based on filename. !!!")
+                self.is_model_loaded = False
+                return
 
-        # 해커톤 당일 긴급 수정 가이드 적용 (자동으로 doc_type 인식)
-        self.labels = sorted(df['doc_type'].unique().tolist())
-        self.label_to_id = {label: i for i, label in enumerate(self.labels)}
-        self.id_to_label = {i: label for i, label in enumerate(self.labels)}
-        log.info(f"Auto-detected document types: {self.labels}")
+            self.model = DistilBertForSequenceClassification.from_pretrained(model_path)
+            self.tokenizer = DistilBertTokenizer.from_pretrained(model_path)
+            self.model.to(self.device)
+            self.model.eval()
+            self.is_model_loaded = True  # ◀◀◀ [데모 모드] 성공 시 플래그 설정
+            log.info(f"Successfully loaded REAL classifier model from {model_path}")
 
-        with open(ocr_results_path, 'r', encoding='utf-8') as f:
-            ocr_results = json.load(f)
+        except Exception as e:
+            log.error(f"Failed to load model from {model_path}: {e}. Falling back to DEMO MODE.")
+            self.is_model_loaded = False
 
-        log.info(f"Loaded {len(df)} labels from CSV")
-        log.info(f"Loaded {len(ocr_results)} OCR results")
+    def classify(self, text: str, file_name: str = "unknown.txt") -> Dict[str, Any]:
+        """
+        주어진 텍스트를 분류합니다.
+        [수정] 모델이 로드되지 않았으면 "데모 모드" 분류 수행
+        """
+        # ◀◀◀ [데모 모드] 로직 ◀◀◀
+        if not self.is_model_loaded:
+            log.warning(f"Classifying using DEMO logic (filename match for: {file_name}).")
+            file_name_lower = file_name.lower()
+            if "invoice" in file_name_lower:
+                return {"doc_type": "invoice", "confidence": 1.0, "demo": True}
+            elif "receipt" in file_name_lower:
+                return {"doc_type": "receipt", "confidence": 1.0, "demo": True}
+            elif "contract" in file_name_lower:
+                return {"doc_type": "contract", "confidence": 1.0, "demo": True}
+            elif "report" in file_name_lower:
+                return {"doc_type": "report", "confidence": 1.0, "demo": True}
+            elif "resume" in file_name_lower:
+                return {"doc_type": "resume", "confidence": 1.0, "demo": True}
+            else:
+                return {"doc_type": "unknown", "confidence": 1.0, "demo": True}
 
-        # Step 2: 학습 데이터 준비
-        log.info("\nStep 2: Preparing training data...")
-        texts = []
-        labels = []
-        skipped = 0
-
-        for _, row in df.iterrows():
-            filename = row['filename']
-            doc_type = row['doc_type']
-
-            if filename not in ocr_results:
-                log.warning(f"Warning: {filename} not found in OCR results, skipping...")
-                skipped += 1
-                continue
-
-            # error 처리
-            if 'error' in ocr_results[filename]:
-                log.warning(f"Warning: {filename} OCR error, skipping...")
-                skipped += 1
-                continue
-
-            text = ocr_results[filename]['text']
-            texts.append(text)
-            labels.append(self.label_to_id[doc_type])
-
-        log.info(f"Prepared {len(texts)} training samples")
-        if skipped > 0:
-            log.warning(f"Skipped {skipped} samples due to errors")
-
-        # Step 3: Dataset 생성
-        log.info("\nStep 3: Creating dataset...")
-        dataset = Dataset.from_dict({
-            'text': texts,
-            'label': labels
-        })
-
-        log.info(f"Dataset created with {len(dataset)} samples")
-
-        # Step 4: Tokenization
-        log.info("\nStep 4: Tokenizing text...")
-
-        def tokenize_function(examples):
-            return self.tokenizer(
-                examples['text'],
-                padding='max_length',
-                truncation=True,
-                max_length=512
-            )
-
-        tokenized_dataset = dataset.map(tokenize_function, batched=True)
-        log.info("Tokenization complete!")
-
-        # Step 5: 모델 초기화
-        log.info("\nStep 5: Initializing model...")
-        self.model = DistilBertForSequenceClassification.from_pretrained(
-            self.model_name,
-            num_labels=len(self.labels),
-            id2label=self.id_to_label,
-            label2id=self.label_to_id
-        )
-        log.info(f"Model initialized for {len(self.labels)} classes")
-
-        # Step 6: 학습 설정
-        log.info("\nStep 6: Configuring training...")
-        training_args = TrainingArguments(
-            output_dir=output_dir,
-            num_train_epochs=3,
-            per_device_train_batch_size=8,
-            learning_rate=2e-5,
-            logging_steps=10,
-            save_strategy='epoch',
-            save_total_limit=2,
-        )
-        log.info("Training configuration set")
-
-        # Step 7: 학습 실행
-        log.info("\nStep 7: Starting training...")
-        log.info("This may take 30-60 minutes...")
-
-        trainer = Trainer(
-            model=self.model,
-            args=training_args,
-            train_dataset=tokenized_dataset,
-        )
-
-        trainer.train()
-        log.info("\nTraining complete!")
-
-        # Step 8: 모델 저장
-        log.info("\nStep 8: Saving model...")
-        self.save_model(output_dir)
-        log.info(f"Model saved to {output_dir}")
-
-        log.info("\n" + "=" * 60)
-        log.info("Training Complete!")
-        log.info("=" * 60)
-
-    def classify(self, text):
-        if self.model is None:
-            log.error("Error: Model not loaded! Call load_model() first.")
-            raise Exception("Error: Model not loaded! Call load_model() first.")
-
-        # CPU 또는 MPS(M1/M2 Mac) 또는 CUDA(Nvidia) 자동 감지
-        device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
-        self.model.to(device)
-
-        inputs = self.tokenizer(
-            text,
-            return_tensors='pt',
-            padding=True,
-            truncation=True,
-            max_length=512
-        ).to(device)  # 입력 텐서도 같은 장치로 이동
+        # ▼▼▼ [진짜 모드] 로직 ▼▼▼
+        log.debug(f"Classifying using REAL model.")
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
         with torch.no_grad():
             outputs = self.model(**inputs)
-            predictions = torch.nn.functional.softmax(outputs.logits, dim=-1)
-            predicted_class = torch.argmax(predictions, dim=-1).item()
-            confidence = predictions[0][predicted_class].item()
+            logits = outputs.logits
+            probabilities = softmax(logits, dim=1)
+            confidence, predicted_class_idx = torch.max(probabilities, dim=1)
+
+        predicted_label = self.label_map.get(predicted_class_idx.item(), "unknown")
 
         return {
-            'doc_type': self.id_to_label[predicted_class],
-            'confidence': confidence
+            "doc_type": predicted_label,
+            "confidence": confidence.item()
         }
-
-    def save_model(self, path):
-        if self.model is None:
-            log.error("Error: No model to save!")
-            return
-        log.info(f"Saving model to {path}...")
-        self.model.save_pretrained(path)
-        self.tokenizer.save_pretrained(path)
-        log.info("Model saved!")
-
-    def load_model(self, path):
-        log.info(f"Loading model from {path}...")
-        try:
-            self.model = DistilBertForSequenceClassification.from_pretrained(path)
-            self.tokenizer = DistilBertTokenizer.from_pretrained(path)
-
-            # 모델의 config에서 label 정보 업데이트 (중요)
-            if self.model.config.id2label:
-                self.id_to_label = {int(k): v for k, v in self.model.config.id2label.items()}
-                self.label_to_id = self.model.config.label2id
-                self.labels = list(self.model.config.label2id.keys())
-            else:
-                log.warning(f"Model config at {path} does not contain id2label mapping. Using defaults.")
-
-            log.info("Model loaded successfully!")
-            log.info(f"Model labels: {self.labels}")
-        except Exception as e:
-            log.error(f"Failed to load model from {path}. Error: {e}", exc_info=True)
-            raise

@@ -1,20 +1,25 @@
-celery[redis]
+# FastAPI & Celery Core
 fastapi
 uvicorn[standard]
-pydantic
+celery
 redis
-meilisearch
-qdrant-client
-python-multipart
-paddleocr
-paddlepaddle
+pydantic
+
+# AI & Data
 torch
 transformers
-datasets
-scikit-learn
-tqdm
+sentencepiece
+pdf2image
+paddleocr
+opencv-python
 numpy
-pandas
-httpx
-jsonschema
-openai
+
+# Database & Search
+qdrant-client
+meilisearch
+requests
+
+# Monitoring & Utils
+prometheus-fastapi-instrumentator
+loguru
+python-multipart

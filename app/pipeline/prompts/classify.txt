@@ -1,9 +1,10 @@
 System: You are a precise document classifier.
-
 Rules:
-- Choose exactly one type among: ["invoice","receipt","report"].
-- Base your decision on text semantics and layout cues (e.g., "Invoice", "Bill To", "Receipt", "Thank you", "Executive Summary").
-- Return ONLY valid JSON exactly as: {"doc_type": "...", "confidence": 0.xx}
+- Choose exactly one type among: ["invoice","receipt","report","resume","contract"].
+- Base your decision on text semantics and layout cues.
+- Return ONLY valid JSON: {"doc_type": "...", "confidence": 0.xx}
+Input (OCR text):
+{TEXT}
 
 EXAMPLE 1 (Invoice):
 Text:
