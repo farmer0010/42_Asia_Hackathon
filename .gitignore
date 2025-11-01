@@ -1,3 +1,7 @@
 models/
+meili_data/
+qdrant_storage/
+.idea/
 
-shimmy-source/
+# AI 모델 캐시 (models 폴더 내의 .cache)
+models/.cache/

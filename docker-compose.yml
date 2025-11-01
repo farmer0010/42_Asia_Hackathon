@@ -4,16 +4,21 @@ services:
     container_name: api-server
     ports:
       - "8000:8000"
+    volumes:
+      - ./models:/models  # ◀◀◀ [추가] 로컬 models 폴더 연결
     environment:
       - PYTHONPATH=/usr/src
       - REDIS_BROKER_URL=redis://redis:6379/0
       - MEILI_HOST_URL=http://meilisearch:7700
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - LLM_MODEL_NAME=gemma3-custom
-      - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
+      # [Ollama -> Shimmy 환경 변수 수정]
+      - LLM_BASE_URL=http://shimmy-server:8001/v1 # ◀◀◀ [수정]
+      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf # ◀◀◀ [수정]
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors # ◀◀◀ [수정] (이 파일이 /models에 있어야 합니다)
       - VECTOR_DIMENSION=1024
+      # [분류 모델 경로 추가]
+      - MODEL_PATH=/models/classifier # ◀◀◀ [추가]
     depends_on:
       redis:
         condition: service_healthy
@@ -23,8 +28,9 @@ services:
         condition: service_started
       celery-worker:
         condition: service_started
-      ollama:
-        condition: service_healthy
+      # ollama: (삭제) ◀◀◀
+      shimmy-server: # ◀◀◀ [추가]
+        condition: service_started
     restart: unless-stopped
 
   redis:
@@ -46,22 +52,28 @@ services:
   celery-worker:
     build: .
     container_name: celery-worker
+    volumes:
+      - ./models:/models # ◀◀◀ [추가] 로컬 models 폴더 연결
     environment:
       - PYTHONPATH=/usr/src
       - REDIS_BROKER_URL=redis://redis:6379/0
       - MEILI_HOST_URL=http://meilisearch:7700
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - LLM_MODEL_NAME=gemma3-custom
-      - EMBEDDING_MODEL_NAME=mxbai-embed-large-custom
+      # [Ollama -> Shimmy 환경 변수 수정]
+      - LLM_BASE_URL=http://shimmy-server:8001/v1 # ◀◀◀ [수정]
+      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf # ◀◀◀ [수정]
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors # ◀◀◀ [수정] (이 파일이 /models에 있어야 합니다)
       - VECTOR_DIMENSION=1024
+      # [분류 모델 경로 추가]
+      - MODEL_PATH=/models/classifier # ◀◀◀ [추가]
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
+      # ollama: (삭제) ◀◀◀
+      shimmy-server: # ◀◀◀ [추가]
+        condition: service_started
     restart: unless-stopped
 
   meilisearch:
@@ -106,18 +118,14 @@ services:
       - redis
     restart: unless-stopped
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
+  shimmy-server:
+    image: ghcr.io/michael-a-kuykendall/shimmy:latest
+    container_name: shimmy-server
     ports:
-      - "11434:11434"
+      - "8001:8001" # (FastAPI 8000번과 겹치지 않도록 8001로 설정)
     volumes:
-      - 'C:\Users\김주영\.ollama:/root/.ollama'
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - ./models:/models # (로컬 models 폴더를 컨테이너 /models로 연결)
+    command: --model-dir /models --port 8001 # (모델 폴더와 포트 지정)
     restart: unless-stopped
 
 volumes:
