@@ -5,16 +5,16 @@ services:
       - "8001:8000"
     volumes:
       - ./app:/usr/src/app
-      - ./models:/usr/src/models  # ◀◀◀ [유지] '분류' 모델 폴더 연결
+      - ./models:/usr/src/models
     env_file:
       - .env
     environment:
-      - MODEL_PATH=/usr/src/models/classifier  # ◀◀◀ [유지] '분류' 모델 경로 설정
+      - MODEL_PATH=/usr/src/models/classifier
     depends_on:
       - redis
       - qdrant
       - meilisearch
-      - llm-server # ◀◀◀ shimmy-server를 llm-server로 의존
+      - llm-server
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -27,16 +27,16 @@ services:
     command: celery -A app.worker.celery_app worker --loglevel=info
     volumes:
       - ./app:/usr/src/app
-      - ./models:/usr/src/models  # ◀◀◀ [유지] '분류' 모델 폴더 연결
+      - ./models:/usr/src/models
     env_file:
       - .env
     environment:
-      - MODEL_PATH=/usr/src/models/classifier  # ◀◀◀ [유지] '분류' 모델 경로 설정
+      - MODEL_PATH=/usr/src/models/classifier
     depends_on:
       - redis
       - qdrant
       - meilisearch
-      - llm-server # ◀◀◀ shimmy-server를 llm-server로 의존
+      - llm-server
     restart: on-failure
 
   redis:
@@ -61,28 +61,29 @@ services:
     ports:
       - "7700:7700"
     environment:
-      - MEILI_MASTER_KEY=masterKey # 데모용. 실제로는 .env 사용
+      - MEILI_MASTER_KEY=SuperSecure_42Asia_MasterKey # 데모용. 실제로는 .env 사용
     volumes:
       - meili_data:/meili_data
     restart: always
 
   llm-server:
     build:
-      context: ./shimmy-source  # ◀◀◀ [변경] Ollama 대신 shimmy-source 폴더를 빌드
+      context: ./shimmy-source
     ports:
-      - "11434:11434"           # ◀◀◀ [변경] FastAPI가 기대하는 11434 포트로 노출
+      - "11434:11434"
     volumes:
-      - ./models:/models        # ◀◀◀ [변경] LLM 모델(GGUF)이 있는 폴더
+      - ./models:/models
     environment:
-      - SHIMMY_MODEL_DIR=/models # ◀◀◀ [변경] shimmy가 모델을 찾을 경로
-      - SHIMMY_WEB_PORT=11434    # ◀◀◀ [변경] shimmy가 11434 포트에서 실행되도록 설정
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - SHIMMY_MODEL_DIR=/models
+      - SHIMMY_WEB_PORT=11434
+    # ◀◀◀ [수정] 아래 deploy 블록을 삭제/주석 처리 ◀◀◀
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
     restart: always
 
 volumes:

@@ -24,3 +24,9 @@ class Settings:
 @lru_cache()
 def get_settings():
     return Settings()
+
+# --- 이 부분이 핵심입니다 ---
+# get_settings() 함수를 호출하여 settings 객체를 생성하고
+# 다른 모듈(main.py, worker.py)에서 import할 수 있도록 합니다.
+settings = get_settings()
+# -------------------------

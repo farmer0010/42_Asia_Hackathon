@@ -6,7 +6,7 @@ FROM python:3.11-slim as builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     poppler-utils \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,11 +27,15 @@ FROM python:3.11-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     poppler-utils \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/src/app
+# [수정] 작업 폴더를 /usr/src로 설정
+WORKDIR /usr/src
+
+# ◀◀◀ [핵심 수정] Python이 'app' 모듈을 찾도록 PYTHONPATH 설정 ◀◀◀
+ENV PYTHONPATH="/usr/src"
 
 # Builder 스테이지에서 설치한 라이브러리와 소스 코드 복사
 COPY --from=builder /usr/src/app ./app

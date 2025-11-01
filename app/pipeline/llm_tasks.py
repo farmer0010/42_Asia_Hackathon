@@ -1,7 +1,7 @@
 import os
 import json
 from functools import lru_cache, partial
-from typing import Dict, Any, Callable
+from typing import Optional, Callable, Dict, Any
 import requests
 
 from .guards import parse_json_from_llm

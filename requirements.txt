@@ -6,13 +6,17 @@ redis
 pydantic
 
 # AI & Data
+openai
 torch
 transformers
 sentencepiece
 pdf2image
+paddle
+scipy
 paddleocr
 opencv-python
 numpy
+jsonschema
 
 # Database & Search
 qdrant-client

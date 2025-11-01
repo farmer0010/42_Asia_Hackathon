@@ -1,21 +1,27 @@
 import logging
 import sys
 
-def setup_logging():
+
+def setup_logging(name="worker_log") -> logging.Logger:
     """
-    모든 로그는 표준 출력(stdout)으로 전송되며, Docker 환경에서 쉽게 확인 가능.
+    Celery 워커를 위한 로깅을 설정하고 로거 인스턴스를 반환합니다.
     """
-    # 전역 로거를 가져옵니다.
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO) # 로그 레벨 설정
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
 
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-
-    # 로거에 핸들러가 이미 추가되어 있는지 확인하여 중복을 방지.
+    # 핸들러가 이미 존재하면 추가하지 않습니다. (Celery의 이중 로깅 방지)
     if not logger.handlers:
-        logger.addHandler(handler)
+        # 콘솔 출력 핸들러 설정
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.INFO)
+
+        # 포맷 설정
+        formatter = logging.Formatter(
+            '%(name)s - %(levelname)s - %(message)s'
+        )
+        ch.setFormatter(formatter)
+
+        # 로거에 핸들러 추가
+        logger.addHandler(ch)
+
+    return logger  # ◀◀◀ 이 반환문이 누락된 오류를 해결합니다!

@@ -24,8 +24,9 @@ log = setup_logging()
 # --- Celery 설정 ---
 celery_app = Celery(
     "worker",
-    broker=settings.CELERY_BROKER_URL,
-    backend=settings.CELERY_RESULT_BACKEND
+    broker=settings.REDIS_BROKER_URL,  # <-- 💡 이렇게 수정
+    backend=settings.REDIS_BROKER_URL, # <-- 💡 여기도 똑같이 수정
+    include=["app.tasks"],
 )
 celery_app.conf.task_track_started = True
 celery_app.conf.task_serializer = 'json'
@@ -42,6 +43,7 @@ classifier_model = DocumentClassifier(model_path=MODEL_PATH)
 # [수정] PaddleOCR 모듈 인스턴스화
 try:
     USE_GPU = torch.cuda.is_available()
+    log.info(f"GPU Available: {USE_GPU}")
     ocr_module = OCRModule(lang='en', use_gpu=USE_GPU)
 except Exception as e:
     log.error(f"Failed to load OCRModule: {e}. OCR tasks will fail.", exc_info=True)
@@ -144,7 +146,6 @@ def perform_llm_extraction(context: DocumentContext):
         context.structured_data = {"error": str(e)}
 
 
-# ... (perform_pii_and_summary, perform_indexing, cleanup_file 함수는 변경 없음) ...
 def perform_pii_and_summary(context: DocumentContext):
     """4. (병렬) PII 탐지 및 요약"""
     log.info(f"[{context.job_id}] (4/6) Starting PII Masking...")

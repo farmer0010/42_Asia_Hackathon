@@ -14,7 +14,8 @@ f"You fix JSON. Return ONLY valid JSON matching this schema.\nSchema:\n{json.dum
 f"Broken JSON:\n{bad}\nError:\n{err}\n"
     )
 
-async def guarded_json(llm, base_prompt, schema, retries=2):
+# --- 이 함수의 이름이 변경되었습니다 ---
+async def parse_json_from_llm(llm, base_prompt, schema, retries=2):
     out = await llm.generate(base_prompt, max_tokens=800, temperature=0.0)
     ok, res = validate_json(out, schema)
     for _ in range(retries):
