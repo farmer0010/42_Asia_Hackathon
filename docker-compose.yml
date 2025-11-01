@@ -5,20 +5,19 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/models  # ◀◀◀ [추가] 로컬 models 폴더 연결
+      - ./app:/usr/src/app
+      - ./models:/models
     environment:
       - PYTHONPATH=/usr/src
       - REDIS_BROKER_URL=redis://redis:6379/0
       - MEILI_HOST_URL=http://meilisearch:7700
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      # [Ollama -> Shimmy 환경 변수 수정]
-      - LLM_BASE_URL=http://shimmy-server:8001/v1 # ◀◀◀ [수정]
-      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf # ◀◀◀ [수정]
-      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors # ◀◀◀ [수정] (이 파일이 /models에 있어야 합니다)
+      - LLM_BASE_URL=http://shimmy-server:8001/v1
+      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors
       - VECTOR_DIMENSION=1024
-      # [분류 모델 경로 추가]
-      - MODEL_PATH=/models/classifier # ◀◀◀ [추가]
+      - MODEL_PATH=/models/classifier
     depends_on:
       redis:
         condition: service_healthy
@@ -28,52 +27,60 @@ services:
         condition: service_started
       celery-worker:
         condition: service_started
-      # ollama: (삭제) ◀◀◀
-      shimmy-server: # ◀◀◀ [추가]
+      shimmy-server:
         condition: service_started
     restart: unless-stopped
 
   redis:
-    image: "redis:alpine"
+    image: redis:7-alpine
     container_name: redis-broker
-    # ★★★ 수정: 포트와 볼륨을 모두 제거하여 권한 문제 원천 차단 ★★★
-    # ports:
-    #   - "6380:6379"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      interval: 10s
+      timeout: 5s
       retries: 5
-    # volumes:
-    #  - redis_data:/data
     restart: unless-stopped
-    # ★★★ 수정 완료 ★★★
 
   celery-worker:
     build: .
     container_name: celery-worker
     volumes:
-      - ./models:/models # ◀◀◀ [추가] 로컬 models 폴더 연결
+      - ./app:/usr/src/app
+      - ./models:/models
     environment:
       - PYTHONPATH=/usr/src
       - REDIS_BROKER_URL=redis://redis:6379/0
       - MEILI_HOST_URL=http://meilisearch:7700
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      # [Ollama -> Shimmy 환경 변수 수정]
-      - LLM_BASE_URL=http://shimmy-server:8001/v1 # ◀◀◀ [수정]
-      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf # ◀◀◀ [수정]
-      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors # ◀◀◀ [수정] (이 파일이 /models에 있어야 합니다)
+      - LLM_BASE_URL=http://shimmy-server:8001/v1
+      - LLM_MODEL_NAME=google_gemma-3-4b-it-Q4_K_M.gguf
+      - EMBEDDING_MODEL_NAME=mxbai-embed-large.safetensors
       - VECTOR_DIMENSION=1024
-      # [분류 모델 경로 추가]
-      - MODEL_PATH=/models/classifier # ◀◀◀ [추가]
+      - MODEL_PATH=/models/classifier
     command: python -m celery -A app.worker worker --loglevel=info
     depends_on:
       redis:
         condition: service_healthy
-      # ollama: (삭제) ◀◀◀
-      shimmy-server: # ◀◀◀ [추가]
+      shimmy-server:
         condition: service_started
+    restart: unless-stopped
+
+  flower:
+    image: mher/flower:2.0
+    container_name: celery-flower
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_BASIC_AUTH=admin:admin
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   meilisearch:
@@ -81,54 +88,41 @@ services:
     container_name: meilisearch
     ports:
       - "7700:7700"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
     volumes:
       - meili_data:/meili_data
+    environment:
+      - MEILI_ENV=development
+      - MEILI_NO_ANALYTICS=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.9.2
     container_name: qdrant
     ports:
       - "6333:6333"
-    environment:
-      - QDRANT__STORAGE__ON_DISK_PAYLOAD=true
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 10s
-      timeout: 10s
-      retries: 15
+      - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
-  flower:
-    image: mher/flower
-    container_name: flower-monitor
-    ports:
-      - "5555:5555"
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - FLOWER_PORT=5555
-    depends_on:
-      - redis
-    restart: unless-stopped
-
   shimmy-server:
-    image: ghcr.io/michael-a-kuykendall/shimmy:latest
+    build:
+      context: ./shimmy-source
+      dockerfile: Dockerfile
     container_name: shimmy-server
     ports:
-      - "8001:8001" # (FastAPI 8000번과 겹치지 않도록 8001로 설정)
+      - "8001:8001"
     volumes:
-      - ./models:/models # (로컬 models 폴더를 컨테이너 /models로 연결)
-    command: --model-dir /models --port 8001 # (모델 폴더와 포트 지정)
+      - ./models:/models
+    command: --model-dir /models --port 8001
     restart: unless-stopped
 
 volumes:
-  # redis_data: <-- redis 볼륨을 안 쓰니 이것도 제거
+  redis_data:
   meili_data:
   qdrant_data:

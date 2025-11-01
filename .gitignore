@@ -1,7 +1,13 @@
-models/
-meili_data/
-qdrant_storage/
+# IDE
 .idea/
 
-# AI 모델 캐시 (models 폴더 내의 .cache)
+# OS
+.DS_Store
+
+# 데이터베이스
+meili_data/
+qdrant_storage/
+
+# AI 모델 및 캐시
+models/
 models/.cache/

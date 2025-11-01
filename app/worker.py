@@ -1,177 +1,135 @@
-import uuid
-import meilisearch
-from celery import Celery
-import logging
 import os
-import json
-import asyncio
-
-from .config import get_settings
-from .pipeline.ocr_module import OCRModule
-from .pipeline.classification_module import DocumentClassifier # <-- 이 import는 남겨둡니다 (객체 생성은 함)
-from .logger_config import setup_logging
-from .pipeline.client import LLMClient
-from .pipeline import llm_tasks, guards
-from qdrant_client import QdrantClient, models
-
-setup_logging()
-log = logging.getLogger(__name__)
-
-settings = get_settings()
-celery_app = Celery("tasks", broker=settings.REDIS_BROKER_URL, backend=settings.REDIS_BROKER_URL)
-meili_client = meilisearch.Client(url=settings.MEILI_HOST_URL)
-qdrant_client = QdrantClient(host=settings.QDRANT_HOST, port=settings.QDRANT_PORT)
-QDRANT_COLLECTION_NAME = "documents_collection"
-
-log.info("AI 모델(OCR/Classifier)을 메모리에 로드합니다...")
-try:
-    ocr_model = OCRModule(lang='en')
-    classifier_model = DocumentClassifier() # <-- 객체는 생성하지만...
-    MODEL_PATH = os.getenv("MODEL_PATH", "distilbert-base-uncased")
-
-    # --- 🚨 핫픽스 1/2: 모델 로드 주석 처리 (Crash 방지) ---
-    # classifier_model.load_model(MODEL_PATH) # <-- 이 줄은 주석 처리 유지!
-    log.warning(f"!!! 임시 테스트: classifier_model.load_model({MODEL_PATH}) 로드를 건너뜁니다!!!")
-    # --- 핫픽스 끝 ---
-
-    log.info(f"AI 모델 ({MODEL_PATH}) 로드 완료.") # <-- 이 로그는 그대로 둡니다 (오해 소지 있지만 테스트 목적)
-    log.info("LLM 클라이언트 및 스키마를 로드합니다...")
-    llm_client = LLMClient(model=settings.LLM_MODEL_NAME, base=settings.OLLAMA_BASE_URL)
-    # --- ★★★ 기존 코드 유지: invoice, receipt 스키마만 로드 ---
-    invoice_schema = json.loads(llm_tasks.read("app/pipeline/schemas/invoice_v1.json"))
-    receipt_schema = json.loads(llm_tasks.read("app/pipeline/schemas/receipt_v1.json"))
-    log.info("LLM 클라이언트 및 스키마 로드 완료.")
-except Exception as e:
-    log.error(f"AI 모델 또는 LLM 클라이언트 로드 실패: {e}", exc_info=True)
-    raise e
-
-
-@celery_app.task(
-    bind=True,
-    autoretry_for=(Exception,),
-    retry_kwargs={'max_retries': 3},
-    retry_backoff=True,
-    retry_backoff_max=60
+import time
+import logging
+from celery import Celery
+from celery.signals import worker_process_init
+from kombu.utils.encoding import bytes_to_str
+from kombu.serialization import register
+from app.config import get_settings
+from app.pipeline.ocr_module import OCRModule
+from app.pipeline.classification_module import DocumentClassifier
+from app.pipeline.llm_tasks import (
+    classify_document_type,
+    extract_invoice_data,
+    extract_receipt_data,
+    summarize_document,
+    detect_pii
 )
-async def process_document(self, filename: str, file_content: bytes):
-    doc_id = str(uuid.uuid4())
-    log.info(f"'{filename}' (ID: {doc_id}) AI 파이프라인(Phase 2) 처리 시작... (시도: {self.request.retries + 1})")
+from app.pipeline.client import LLMClient
+from app.schemas import DocumentData, DocumentResult
 
-    temp_dir = "/tmp/hackathon_uploads"
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_file_path = os.path.join(temp_dir, f"{doc_id}_{filename}")
+log = logging.getLogger(__name__)
+settings = get_settings()
+
+# --- [수정] MODEL_PATH 기본값을 학습된 모델 경로로 변경 ---
+MODEL_PATH = os.getenv("MODEL_PATH", "/models/classifier")
+
+# 전역 변수로 모델 인스턴스 저장 (워커 초기화 시 로드)
+ocr_model_instance = None
+classifier_model_instance = None
+
+
+@worker_process_init.connect
+def init_worker(**kwargs):
+    global ocr_model_instance, classifier_model_instance
+    log.info("--- 🚀 Celery 워커 초기화: AI 모델 로드 시작 ---")
+
+    # 1. OCR 모듈 로드
+    ocr_model_instance = OCRModule()
+
+    # 2. 분류 모듈 로드
+    classifier_model_instance = DocumentClassifier()
+    try:
+        # --- [수정] 핫픽스 제거: 모델 로드 주석 해제 ---
+        classifier_model_instance.load_model(MODEL_PATH)
+        log.info(f"✅ 분류 모델 로드 성공: {MODEL_PATH}")
+    except Exception as e:
+        log.error(f"🚨 분류 모델 로드 실패: {e}", exc_info=True)
+        # 모델 로드 실패 시에도 워커는 계속 실행되도록 함 (대신 분류 기능은 비활성화)
+        classifier_model_instance = None
+
+    log.info("--- ✅ AI 모델 로드 완료 ---")
+
+
+# Celery 앱 설정
+celery_app = Celery(
+    "worker",
+    broker=settings.REDIS_BROKER_URL,
+    backend=settings.REDIS_BROKER_URL
+)
+celery_app.conf.task_track_started = True
+
+
+@celery_app.task(name="process_document_task")
+def process_document_task(doc_data: dict) -> dict:
+    global ocr_model_instance, classifier_model_instance
+
+    start_time = time.time()
+    doc = DocumentData(**doc_data)
+    log.info(f"--- 📄 작업 시작 (ID: {doc.id}) ---")
 
     try:
-        with open(temp_file_path, "wb") as f:
-            f.write(file_content)
+        # --- 1. OCR Step ---
+        if not ocr_model_instance:
+            raise Exception("OCR 모델이 로드되지 않았습니다.")
 
-        log.info(f"--- 1. PaddleOCR Step Start (ID: {doc_id}) ---")
-        ocr_result = ocr_model.extract_text(temp_file_path)
-        extracted_text = ocr_result.get('text', '')
-
+        extracted_text = ocr_model_instance.extract_text(doc.content_b64)
         if not extracted_text:
-            log.warning(f"'{filename}' (ID: {doc_id}) 텍스트 추출 실패.")
-            # (에러 반환 구조는 이전과 동일)
-            return {
-                "id": doc_id, "filename": filename, "error": "Failed to extract text (OCR)",
-                "classification": {}, "extracted_data": {}, "summary": "", "pii_detected": [],
-                "vector_indexed": False
-            }
+            log.warning(f"OCR 결과 없음 (ID: {doc.id})")
+            extracted_text = ""  # 텍스트가 없어도 다음 단계 진행
 
-        log.info(f"--- 2. Classification Step Start (ID: {doc_id}) ---")
+        # --- 2. Classification Step ---
+        doc_type = "unknown"
+        if not classifier_model_instance:
+            log.error(f"🚨 분류 모델이 로드되지 않아 'unknown'으로 처리 (ID: {doc.id})")
+            classification_result = {"doc_type": "unknown", "confidence": 0.0}
+        else:
+            # --- [수정] 핫픽스 제거: 실제 분류기 호출 ---
+            classification_result = classifier_model_instance.classify(extracted_text)
+            doc_type = classification_result.get("doc_type", "unknown")
+            log.info(f"분류 결과: {doc_type} (신뢰도: {classification_result.get('confidence', 0):.2%})")
 
-        # --- 🚨 핫픽스 2/2: 분류기 호출 대신 'unknown'으로 고정 (Crash 방지) ---
-        # classification_result = classifier_model.classify(extracted_text) # <-- 이 줄은 주석 처리 유지!
-        log.warning("!!! 임시 테스트: classifier.classify() 대신 'unknown' 반환 !!!")
-        classification_result = {"doc_type": "unknown", "confidence": 0.0} # <-- 하드코딩 유지!
-        # --- 핫픽스 끝 ---
+        # --- 3. LLM Tasks (정보 추출, 요약, PII) ---
+        llm_client = LLMClient(model=settings.LLM_MODEL_NAME, base=settings.LLM_BASE_URL)
 
-        doc_type = classification_result.get('doc_type', 'unknown')
-        doc_confidence = classification_result.get('confidence', 0.0)
-        log.info(f"'{filename}' (ID: {doc_id}) 분류 결과: {doc_type} (신뢰도: {doc_confidence:.2%})")
-
-        log.info(f"--- 3a. LLM Extraction Step Start (ID: {doc_id}, Type: {doc_type}) ---")
         extracted_data = {}
-        # --- ★★★ 기존 코드 유지: invoice, receipt만 추출 ---
         if doc_type == "invoice":
-            extracted_data = await llm_tasks.extract_invoice(extracted_text, llm_client, invoice_schema) or {}
+            log.info("LLM 호출: Invoice 정보 추출")
+            extracted_data = extract_invoice_data(extracted_text, llm_client)
         elif doc_type == "receipt":
-            extracted_data = await llm_tasks.extract_receipt(extracted_text, llm_client, receipt_schema) or {}
-        # (resume, report, contract 로직 없음)
-        log.info(f"LLM (ID: {doc_id}) 추출 완료: {extracted_data}")
+            log.info("LLM 호출: Receipt 정보 추출")
+            extracted_data = extract_receipt_data(extracted_text, llm_client)
 
-        # (Summarization, PII Detection, MeiliSearch, Qdrant 인덱싱 로직은 이전과 동일하게 유지)
-        log.info(f"--- 3b. LLM Summarization Step Start (ID: {doc_id}) ---")
-        summary = await llm_tasks.summarize(extracted_text, llm_client)
-        log.info(f"LLM (ID: {doc_id}) 요약 완료: {summary[:50]}...")
+        log.info("LLM 호출: 요약")
+        summary = summarize_document(extracted_text, llm_client)
 
-        log.info(f"--- 3c. LLM PII Detection Step Start (ID: {doc_id}) ---")
-        pii_results = await llm_tasks.detect_pii(extracted_text, llm_client)
-        log.info(f"LLM (ID: {doc_id}) PII 탐지 완료: {len(pii_results)}개")
+        log.info("LLM 호출: PII 탐지")
+        pii_results = detect_pii(extracted_text, llm_client)
 
-        log.info(f"--- 4. MeiliSearch Indexing Step Start (ID: {doc_id}) ---")
-        document_payload = {
-            "id": doc_id,
-            "filename": filename,
-            "content": extracted_text,
-            "doc_type": doc_type,
-            "doc_confidence": doc_confidence,
-            "extracted_data": extracted_data,
-            "summary": summary,
-            "pii_count": len(pii_results),
-        }
-        meili_client.index("documents").add_documents([document_payload])
-        log.info(f"'{filename}' (ID: {doc_id}) MeiliSearch 인덱싱 완료.")
-
-        log.info(f"--- 5. Qdrant Indexing Step Start (ID: {doc_id}) ---")
-        vector_indexed = False
-
-        vector = await llm_tasks.get_embedding(
-            extracted_text,
-            llm_client,
-            settings.EMBEDDING_MODEL_NAME
+        end_time = time.time()
+        result = DocumentResult(
+            id=doc.id,
+            filename=doc.filename,
+            status="SUCCESS",
+            full_text_ocr=extracted_text,
+            classification=classification_result,
+            extracted_data=extracted_data,
+            summary=summary,
+            pii_detected=pii_results,
+            processing_time=end_time - start_time
         )
 
-        if not vector:
-            log.warning(f"'{filename}' (ID: {doc_id})의 임베딩 벡터 생성 실패. Qdrant 인덱싱을 건너뜁니다.")
-        else:
-            qdrant_payload = {
-                "filename": filename,
-                "doc_type": doc_type,
-                "summary": summary,
-                "meili_id": doc_id
-            }
-
-            qdrant_client.upsert(
-                collection_name=QDRANT_COLLECTION_NAME,
-                points=[
-                    models.PointStruct(
-                        id=doc_id,
-                        vector=vector,
-                        payload=qdrant_payload
-                    )
-                ]
-            )
-            vector_indexed = True
-            log.info(f"'{filename}' (ID: {doc_id}) Qdrant 인덱싱 완료.")
-
-        result_summary = f"'{filename}' (Phase 2) 처리 완료 (ID: {doc_id}, Type: {doc_type}, Vector: {vector_indexed})"
-        log.info(result_summary)
-
-        return {
-            "id": doc_id,
-            "filename": filename,
-            "classification": classification_result,
-            "extracted_data": extracted_data,
-            "summary": summary,
-            "pii_detected": pii_results,
-            "vector_indexed": vector_indexed
-        }
+        log.info(f"--- ✅ 작업 성공 (ID: {doc.id}, 소요 시간: {end_time - start_time:.2f}s) ---")
+        return result.model_dump()
 
     except Exception as e:
-        log.error(f"'{filename}' (ID: {doc_id}) 처리 중 예외 발생 (시도: {self.request.retries + 1}): {e}", exc_info=True)
-        raise
-    finally:
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
-            log.info(f"임시 파일 삭제: {temp_file_path}")
+        end_time = time.time()
+        log.error(f"--- 🚨 작업 실패 (ID: {doc.id}): {e} ---", exc_info=True)
+        result = DocumentResult(
+            id=doc.id,
+            filename=doc.filename,
+            status="FAILURE",
+            error_message=str(e),
+            processing_time=end_time - start_time
+        )
+        return result.model_dump()
