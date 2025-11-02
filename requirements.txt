@@ -4,6 +4,7 @@ uvicorn[standard]
 celery
 redis
 pydantic
+pydantic-settings # config.py에서 필요
 
 # AI & Data
 openai
@@ -11,8 +12,8 @@ torch
 transformers
 sentencepiece
 pdf2image
-paddle
-scipy==1.6.0
+paddlepaddle  # 🚨 [수정 1]: 'paddle'이 아니라 'paddlepaddle'입니다. (핵심 오류)
+scipy         # 🚨 [수정 2]: 버전을 삭제하여 Docker가 호환 버전을 찾도록 함
 paddleocr
 opencv-python
 numpy
