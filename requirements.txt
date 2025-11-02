@@ -12,11 +12,12 @@ transformers
 sentencepiece
 pdf2image
 paddle
-scipy
+scipy==1.6.0
 paddleocr
 opencv-python
 numpy
 jsonschema
+paddlex
 
 # Database & Search
 qdrant-client
