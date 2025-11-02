@@ -75,20 +75,34 @@ services:
   llm-server:
     build:
       context: ./shimmy-source
-    ports:
-      - "11435:11435" # 1. 포트는 11435로 통일
+      dockerfile: Dockerfile
+
+    # [수정] command: 리스트의 맨 앞에 실행 파일 'shimmy'를 추가해야 합니다.
+    command: [
+      # 0. 실행 파일
+      "shimmy",
+
+      # 1. Global Arg: 모델 디렉토리 지정
+      "--model-dirs",
+      "/usr/src/models",
+
+      # 2. Subcommand: 서버 실행
+      "serve",
+
+      # 3. Subcommand Arg: 0.0.0.0:11434로 바인딩
+      "--bind",
+      "0.0.0.0:11434"
+    ]
+
     volumes:
-      - ./models:/models
-    environment:
-      - SHIMMY_MODEL_DIR=/models
+      # 🔴 핵심 제약 조건: 이 로컬 모델 마운트는 절대적으로 유지되어야 함.
+      - ./models:/usr/src/models
 
-      # 👇 [가장 중요] "SHIMMY_WEB_HOST" -> "SHIMMY_HOST"로 변경 (Shimmy 소스코드 기준)
-      - SHIMMY_HOST=0.0.0.0
+    ports:
+      - "11434:11434"
 
-      # 👇 [가장 중요] "SHIMMY_WEB_PORT" -> "SHIMMY_PORT"로 변경 (Shimmy 소스코드 기준)
-      - SHIMMY_PORT=11435
-
-    restart: always
+    depends_on:
+      - redis
 
 volumes:
   redis_data:
