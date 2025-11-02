@@ -36,10 +36,10 @@ COPY --from=builder /app/target/release/shimmy /usr/local/bin/shimmy
 RUN mkdir -p /app/models
 
 # Expose port
-EXPOSE 11434
+EXPOSE 11435
 
 # Set default environment
-ENV SHIMMY_PORT=11434
+ENV SHIMMY_PORT=11435
 ENV SHIMMY_HOST=0.0.0.0
 ENV SHIMMY_BASE_GGUF=/app/models
 

@@ -36,7 +36,7 @@ class OCRModule:
             return ""
 
         try:
-            result = self.ocr.ocr(file_path, cls=True)
+            result = self.ocr.ocr(file_path, cls=False)
 
             full_text = ""
             for line in result:
