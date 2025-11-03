@@ -1,7 +1,4 @@
-import sys
-sys.path.append('srcs')
-
-from ocr_vl_module import OCRVLModule
+from src.ocr.ocr_vl_module import OCRVLModule
 from pathlib import Path
 import json
 import argparse

@@ -1,11 +1,10 @@
-import sys
-sys.path.append('srcs')
-
-from ocr_vl_module import OCRVLModule
+from src.ocr.ocr_vl_module import OCRVLModule
+from src.classification.classifier import DocumentClassifier
 from pathlib import Path
 import json
 import argparse
 from tqdm import tqdm
+import sys
 
 def prepare_classification_input(ocr_result):
     """
@@ -80,8 +79,6 @@ def main():
     classifier = None
     if args.classifier:
         print(f"Loading classifier from {args.classifier}...")
-        sys.path.append('src_backup')  # classification_module 위치
-        from classification_module import DocumentClassifier
         classifier = DocumentClassifier()
         classifier.load_model(args.classifier)
         print("Classifier loaded!")

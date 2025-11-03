@@ -66,7 +66,7 @@
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 2.641018867492676
+    "processing_time": 2.749483823776245
   },
   {
     "filename": "sample1.jpg",
@@ -295,36 +295,7 @@
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 5.906275987625122
-  },
-  {
-    "filename": "invoice1.jpg",
-    "full_text_ocr": "Crcle one trom each line\nStandard Prescription Form\nPharmacy use only\nItem Count\nY\nihe Bill\n2\nDoes pationt\nZ\n103)\n(033656713\nSubsidy Card?\nName of Pat\n05532\nRaclal\nfrom loley\nSernces rendered\nPharmacist\nunfa\nIniials\n$0-00\nfrustratiom\n$ar0.00\npay\n0.00\ntime\nS0.\n00\nRmateials\n$\n0.\n00\n3rd\nER\n$nothing\nCertified Extended Suppt\nSignature of Prescriber",
-    "ocr_confidence": 0.8670433759689331,
-    "layout": {
-      "title": "Standard Prescription Form",
-      "sections": [
-        {
-          "type": "key_value",
-          "text": "$nothing",
-          "position": [
-            277.0,
-            482.0
-          ]
-        }
-      ],
-      "features": {
-        "has_table": true,
-        "num_key_value_pairs": 1,
-        "text_density": 0.37,
-        "total_lines": 37
-      }
-    },
-    "classification": {
-      "doc_type": "unknown",
-      "confidence": 0.0
-    },
-    "processing_time": 3.066879987716675
+    "processing_time": 5.799639940261841
   },
   {
     "filename": "sample3.jpeg",
@@ -344,27 +315,7 @@
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 2.8972361087799072
-  },
-  {
-    "filename": "testtest.png",
-    "full_text_ocr": "RE\n222-321-67459\n20\no\n7 ot\nYY\n727\n53\n15\n459\nA\n2t-2222\nY\nSOH\nn00\nOH\n5315\n74\nHo\nOH\n92|2 587-5846-45654 (5)\n49994-9689-893l",
-    "ocr_confidence": 0.7825519686395471,
-    "layout": {
-      "title": null,
-      "sections": [],
-      "features": {
-        "has_table": true,
-        "num_key_value_pairs": 0,
-        "text_density": 0.22,
-        "total_lines": 22
-      }
-    },
-    "classification": {
-      "doc_type": "unknown",
-      "confidence": 0.0
-    },
-    "processing_time": 5.454016923904419
+    "processing_time": 2.9002737998962402
   },
   {
     "filename": "sample2.png",
@@ -481,6 +432,6 @@
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 6.102646827697754
+    "processing_time": 6.069020986557007
   }
 ]

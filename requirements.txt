@@ -19,3 +19,5 @@ pandas==2.2.3
 tqdm==4.67.1
 psutil
 python-dotenv
+
+requests>=2.31.0

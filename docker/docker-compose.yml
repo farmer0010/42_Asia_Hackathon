@@ -1,0 +1,58 @@
+services:
+  # Ollama LLM 서비스
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hackathon-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    # GPU 설정 (NVIDIA GPU 서버용)
+    # M1 Mac에서 테스트할 때는 이 섹션을 주석 처리하세요
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "ollama serve &
+       OLLAMA_PID=$$!
+       sleep 10
+       ollama pull qwen2.5:7b
+       wait $$OLLAMA_PID"
+
+  # 문서 처리 프로세서
+  processor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: hackathon-processor
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../data/input:/app/data/input              # 입력 폴더
+      - ../data/output:/app/data/output            # 출력 폴더
+      - ../data/models:/app/data/models            # 학습된 모델
+    working_dir: /app
+    command: bash scripts/run_pipeline.sh
+
+volumes:
+  ollama_models:
+    driver: local
+
+networks:
+  default:
+    name: hackathon-network
