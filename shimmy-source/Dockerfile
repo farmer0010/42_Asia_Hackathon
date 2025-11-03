@@ -2,6 +2,7 @@ FROM rust:1.82-bookworm AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
+    build-essential \
     pkg-config \
     libssl-dev \
     libclang-dev \
