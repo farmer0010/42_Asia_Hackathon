@@ -2,21 +2,19 @@
 FROM python:3.11-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1
 
-# 🔴 [수정] 네트워크 오류(400) 해결을 위해 apt-get clean 및 list 강제 삭제 추가
+# 🔴 [수정] PyMuPDF/make/swig/pkg-config 오류 해결
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     curl \
-    # 🔴 [PyMuPDF/make/swig/pkg-config 오류 해결]
     # PyMuPDF (paddleocr 의존성) 컴파일에 필요한 C/C++ 빌드 도구 전체 추가
     build-essential \
     swig \
     pkg-config \
-    # 🔴 [GPU 수정] NVIDIA 드라이버 라이브러리 추가
+    # 🔴 [GPU 수정] NVIDIA 드라이버 라이브러리 및 PaddleOCR 의존성
     libgl1-mesa-glx \
     libglib2.0-0 \
-    # PaddleOCR 의존성
     libgl1 \
     libnss3 \
     libxss1 \

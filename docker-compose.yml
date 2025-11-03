@@ -1,13 +1,10 @@
-# D:\42_asia-hackathon\docker-compose.yml (최종 하이브리드 GPU 전략)
+# D:\42_asia-hackathon\docker-compose.yml (최종 "Full GPU" 전략)
 
 services:
   app:
     build: .
     ports:
       - "8001:8000"
-    # 👇 [유령 캐시 해결] ./app 마운트는 주석 처리된 상태로 유지합니다.
-    # volumes:
-    #   - ./app:/usr/src/app
     volumes:
       - ./models:/usr/src/models
       # 🔴 [수정] 파일 업로드를 위한 공유 볼륨
@@ -31,9 +28,6 @@ services:
   celery-worker:
     build: .
     command: celery -A app.worker.celery_app worker --loglevel=info
-    # 👇 [유령 캐시 해결] ./app 마운트는 주석 처리된 상태로 유지합니다.
-    # volumes:
-    #   - ./app:/usr/src/app
     volumes:
       - ./models:/usr/src/models
       # 🔴 [수정] app과 동일한 공유 볼륨 (파일 읽기용)
@@ -48,6 +42,7 @@ services:
       - meilisearch
       - llm-server
     restart: on-failure
+    # 🔴 [Full GPU 전략 1] Celery-worker에 GPU 할당 (OCR + 분류용)
     deploy:
       resources:
         reservations:
@@ -86,17 +81,19 @@ services:
     build:
       context: ./shimmy-source
       dockerfile: Dockerfile
-    
-    # 🔴 [CPU 유지] llm-server는 VRAM이 부족하므로 CPU로 실행합니다.
-    # 'deploy' 섹션을 추가하지 않습니다.
+
+    # 🔴 [Full GPU 전략 2] llm-server에 GPU를 사용하도록 명령어 수정
     command:
       - "shimmy"
       - "serve"
       - "--bind"
       - "0.0.0.0:11435"
-      # [필수] --model-path로 Gemma 모델(.gguf)을 직접 지정합니다.
       - "--model-path"
+      # [필수] Gemma 모델(.gguf)을 직접 지정합니다.
       - "/models/google_gemma-3-4b-it-Q4_K_M.gguf"
+      # [핵심] GPU 오프로딩 레이어 수 (99 = 전부)
+      - "--n-gpu-layers"
+      - "99"
 
     ports:
       - "11435:11435"
@@ -104,6 +101,13 @@ services:
       # 🔴 [필수] 로컬 모델 마운트
       - ./models:/models
     restart: always
+    # 🔴 [Full GPU 전략 2] Llm-server에도 GPU 할당 (LLM 추론용)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
 
 volumes:
   redis_data:
