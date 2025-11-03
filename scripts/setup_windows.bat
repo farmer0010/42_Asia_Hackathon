@@ -28,7 +28,7 @@ python --version >nul 2>&1
 if errorlevel 1 (
     echo ❌ Python을 찾을 수 없습니다!
     echo.
-    echo Python 3.11 이상을 설치해주세요:
+    echo Python 3.11 을 설치해주세요:
     echo https://www.python.org/downloads/
     echo.
     echo 설치할 때 "Add Python to PATH" 체크박스를 꼭 선택하세요!
