@@ -1,4 +1,6 @@
+# D:\42_asia-hackathon\42_Asia_Hackathon-backend\app\pipeline\ocr_module.py
 # (기반: ocr_ver.2/srcs/ocr_vl_module.py)
+
 import os
 from paddleocr import PaddleOCR
 from PIL import Image
@@ -10,7 +12,6 @@ from ..config import settings
 log = setup_logging()
 
 
-# 🔴 [수정] ocr_ver.2의 OcrVlModule 클래스 대신 OCRModule로 명명
 class OCRModule:
     # 🔴 [핵심 수정] NVIDIA GPU 환경에 맞게 use_gpu 플래그를 생성자에서 받도록 수정
     def __init__(self, lang: str = 'en', use_gpu: bool = False):
@@ -25,10 +26,6 @@ class OCRModule:
             self.ocr = None
 
     def perform_ocr(self, file_path: str) -> str:
-        """
-        OCR을 수행하고 전체 텍스트를 반환합니다.
-        (ocr_ver.2의 ocr_vl_module.py 로직과 거의 동일)
-        """
         if self.ocr is None:
             log.error(f"OCR execution skipped for {file_path}: Module failed to initialize.")
             return ""

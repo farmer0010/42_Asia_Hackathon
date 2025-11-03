@@ -89,11 +89,7 @@ services:
       - "--bind"
       - "0.0.0.0:11435"
       - "--model-path"
-      # [필수] Gemma 모델(.gguf)을 직접 지정합니다.
       - "/models/google_gemma-3-4b-it-Q4_K_M.gguf"
-      # [핵심] GPU 오프로딩 레이어 수 (99 = 전부)
-      - "--n-gpu-layers"
-      - "99"
 
     ports:
       - "11435:11435"
