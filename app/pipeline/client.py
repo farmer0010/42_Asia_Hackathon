@@ -29,6 +29,7 @@ def get_llm_client() -> OpenAI:
         api_key="EMPTY"
     )
 
+
 def get_llm_aclient() -> AsyncOpenAI:
     """(비동기용) Async LLM 클라이언트를 반환합니다."""
     # 🔴 [치명적 오류 수정 1]
@@ -37,6 +38,7 @@ def get_llm_aclient() -> AsyncOpenAI:
         base_url=settings.LLM_API_BASE_URL,
         api_key="EMPTY"
     )
+
 
 # -----------------------------------------------------------------
 #   2. SearchClient (MeiliSearch) - 실제 구현
@@ -49,8 +51,8 @@ class SearchClient:
     # 생성자의 'api_key' 기본값을 settings.MEILI_MASTER_KEY로 변경합니다.
     # (기존 코드 'None'이 'invalid_api_key' 오류의 원인이었습니다)
     def __init__(self,
-                 host_url: str = settings.MEILI_HOST_URL,
-                 api_key: Optional[str] = settings.MEILI_MASTER_KEY): # ⬅️ 이 부분 수정
+                 host_url: str = settings.MEILI_URL,  # ⬅️ meili_host_url 대신 MEILI_URL 사용
+                 api_key: Optional[str] = settings.MEILI_MASTER_KEY):
         try:
             # 🔴 이제 api_key=None이 아닌, settings에서 읽어온 키로 연결합니다.
             self.client = meilisearch.Client(host_url, api_key)
@@ -60,7 +62,7 @@ class SearchClient:
             if api_key:
                 print(f"[SearchClient] MeiliSearch 연결 성공 (호스트: {host_url}, API Key: ...{api_key[-4:]})")
             else:
-                 print(f"[SearchClient] MeiliSearch 연결 성공 (호스트: {host_url}, API Key: None)")
+                print(f"[SearchClient] MeiliSearch 연결 성공 (호스트: {host_url}, API Key: None)")
 
         except Exception as e:
             print(f"[SearchClient] MeiliSearch 연결 실패: {e}")
@@ -105,16 +107,19 @@ class SearchClient:
 class VectorClient:
     """(원본과 동일) Qdrant 클라이언트 래퍼 (실제 구현)"""
 
-    # Qdrant는 .env가 아닌 config.py의 기본값(qdrant:6333)을 사용하고 있으므로
-    # 이 코드는 이미 올바르게 작동합니다. (수정 불필요)
-    def __init__(self, host: str = settings.QDRANT_HOST, port: int = settings.QDRANT_PORT):
-        self.host = host
-        self.port = port
+    # 🔴 [!!! 2차 오류 수정 !!!] 🔴
+    # settings.QDRANT_HOST, settings.QDRANT_PORT 대신
+    # app/config.py에 정의된 settings.QDRANT_URL을 사용합니다.
+    def __init__(self, url: str = settings.QDRANT_URL):  # ⬅️ 수정
+        self.url = url  # ⬅️ 수정
         try:
-            self.client = QdrantClient(host=self.host, port=self.port)
+            # 🔴 QdrantClient는 host/port 대신 url을 직접 받을 수 있습니다.
+            self.client = QdrantClient(url=self.url)  # ⬅️ 수정
             self.collection_name = "document_chunks"  # 컬렉션 이름 (고정)
             self.vector_dim = settings.VECTOR_DIMENSION
-            print(f"[VectorClient] Qdrant 연결 성공 (호스트: {self.host}:{self.port})")
+
+            # ⬅️ 로그 메시지도 수정
+            print(f"[VectorClient] Qdrant 연결 성공 (URL: {self.url})")
 
             # 컬렉션이 없으면 생성
             self.get_or_create_collection()

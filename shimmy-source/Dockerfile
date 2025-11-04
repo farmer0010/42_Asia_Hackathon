@@ -19,7 +19,7 @@ COPY templates/ ./templates/
 RUN cargo build --release --features huggingface --bin shimmy
 
 # Runtime stage
-FROM debian:bookworm
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \

@@ -13,7 +13,7 @@ import uuid  # 🚨 Qdrant 포인트 ID 생성을 위해 추가
 
 from .config import settings
 from .logger_config import setup_logging
-from .pipeline.classification_module import DocumentClassifier
+from .pipeline.classification_module import ClassificationModule
 from .pipeline.ocr_module import OCRModule
 from .pipeline.llm_tasks import (
     get_llm_extraction_task,
@@ -42,7 +42,7 @@ celery_app.conf.accept_content = ['json']
 MODEL_PATH = os.getenv("MODEL_PATH", "/usr/src/models/classifier")
 log.info(f"Attempting to load DocumentClassifier model from: {MODEL_PATH}")
 
-classifier_model = DocumentClassifier(model_path=MODEL_PATH)
+classifier_model = ClassificationModule()
 
 try:
     USE_GPU = torch.cuda.is_available()
@@ -103,14 +103,18 @@ def perform_classification(context: DocumentContext):
         context.classification_result = {"doc_type": "ocr_failed", "confidence": 0.0}
         return
     try:
-        classification_result = classifier_model.classify(
-            text=context.extracted_text,
-            file_name=context.file_name
-        )
-        context.classification_result = classification_result
+        # 1. predict 메서드 호출 (인자는 ocr_text만 받음)
+        predicted_label = classifier_model.predict(ocr_text=context.extracted_text)
+
+        # 2. 파이프라인이 기대하는 dict 형식으로 결과를 수동 구성
+        context.classification_result = {
+            "doc_type": predicted_label,
+            "confidence": 1.0  # predict 모듈이 신뢰도를 반환하지 않으므로 임시값 1.0 사용
+        }
+
         context.classification_time = time.time() - t_start
         log.info(
-            f"[{context.job_id}] (2/6) Classification finished ({context.classification_time:.2f}s). Result: {classification_result}")
+            f"[{context.job_id}] (2/6) Classification finished ({context.classification_time:.2f}s). Result: {context.classification_result}")
     except Exception as e:
         log.error(f"[{context.job_id}] Classification task failed: {e}", exc_info=True)
         context.classification_result = {"doc_type": "classification_failed", "confidence": 0.0}
