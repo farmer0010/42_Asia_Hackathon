@@ -89,7 +89,8 @@ services:
       - "--bind"
       - "0.0.0.0:11435"
       - "--model-path"
-      - "/models/google_gemma-3-4b-it-Q4_K_M.gguf"
+      - "/models/Qwen2.5-7b-Chat-Q4_K_M.gguf"
+      # - "/models/google_gemma-3-4b-it-Q4_K_M.gguf"
 
     ports:
       - "11435:11435"
