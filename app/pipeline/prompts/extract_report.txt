@@ -1,12 +1,9 @@
-System: Extract report fields as JSON:
-{
-  "title": "string or null",
-  "date": "YYYY-MM-DD or null",
-  "key_points": ["string", "..."]  // up to 5 bullets
-}
-Rules:
-- Return ONLY JSON (no comments/markdown).
-- key_points: array of 1~5 concise bullets (no line breaks inside each).
-- Use null if not found.
-Text:
-{TEXT}
+You are an expert AI assistant skilled in document summarization. Based on the following document text, provide a concise summary (2-3 sentences) focusing on key findings, data, and conclusions.
+
+Respond *only* with valid JSON. Do not include any explanations, apologies, or markdown formatting (like ```json).
+
+Here is the JSON schema to follow:
+{SCHEMA}
+
+Here is the document text:
+{CONTEXT}
