@@ -97,13 +97,6 @@ services:
       # 🔴 [필수] 로컬 모델 마운트
       - ./models:/models
     restart: always
-    # 🔴 [Full GPU 전략 2] Llm-server에도 GPU 할당 (LLM 추론용)
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
 
 volumes:
   redis_data:
