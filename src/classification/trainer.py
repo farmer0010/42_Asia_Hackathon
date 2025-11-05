@@ -8,7 +8,7 @@ python src/train_classifier.py \
 
 import argparse
 from pathlib import Path
-from classification_module import DocumentClassifier
+from src.classification.classifier import DocumentClassifier
 
 def main():
     print("Train Classification Model")

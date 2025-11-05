@@ -8,6 +8,8 @@ from datasets import Dataset
 import pandas as pd
 import json
 import torch
+import numpy as np
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 
 class DocumentClassifier:
@@ -70,6 +72,14 @@ class DocumentClassifier:
         
         print(f"Dataset created with {len(dataset)} samples")
         
+        # Step 3.5: Train/Validation Split (80/20)
+        print("\nStep 3.5: Splitting train/validation...")
+        split_dataset = dataset.train_test_split(test_size=0.2, seed=42)
+        train_dataset = split_dataset['train']
+        eval_dataset = split_dataset['test']
+        print(f"  Train: {len(train_dataset)} samples")
+        print(f"  Validation: {len(eval_dataset)} samples")
+        
         # Step 4: Tokenization
         print("\nStep 4: Tokenizing text...")
         
@@ -81,7 +91,8 @@ class DocumentClassifier:
                 max_length=512
             )
         
-        tokenized_dataset = dataset.map(tokenize_function, batched=True)
+        tokenized_train = train_dataset.map(tokenize_function, batched=True)
+        tokenized_eval = eval_dataset.map(tokenize_function, batched=True)
         print("Tokenization complete!")
         
         # Step 5: 모델 초기화
@@ -100,25 +111,75 @@ class DocumentClassifier:
             output_dir=output_dir,
             num_train_epochs=3,
             per_device_train_batch_size=8,
+            per_device_eval_batch_size=16,
             learning_rate=2e-5,
+            
+            # Evaluation 설정
+            eval_strategy='epoch',              # 매 epoch마다 평가
+            save_strategy='epoch',              # 매 epoch마다 저장
+            load_best_model_at_end=True,        # 최고 성능 모델 로드
+            metric_for_best_model='eval_loss',  # eval_loss 기준
+            greater_is_better=False,            # loss는 낮을수록 좋음
+            
+            # Logging
             logging_steps=10,
-            save_strategy='epoch',
-            save_total_limit=2,
+            logging_strategy='steps',
+            
+            # Early Stopping (patience=1: 1 epoch 개선 없으면 중단)
+            save_total_limit=2,                 # 최근 2개 체크포인트만 유지
+            
+            # Overfitting 방지
+            weight_decay=0.01,                  # L2 regularization
         )
         print("Training configuration set")
+        print("  - Validation: enabled")
+        print("  - Early stopping: enabled (based on eval_loss)")
+        print("  - Weight decay: 0.01 (regularization)")
         
         # Step 7: 학습 실행
         print("\nStep 7: Starting training...")
         print("This may take 30-60 minutes...")
         
+        # Metrics 계산 함수
+        def compute_metrics(eval_pred):
+            predictions, labels = eval_pred
+            predictions = np.argmax(predictions, axis=1)
+            
+            accuracy = accuracy_score(labels, predictions)
+            precision, recall, f1, _ = precision_recall_fscore_support(
+                labels, predictions, average='weighted', zero_division=0
+            )
+            
+            return {
+                'accuracy': accuracy,
+                'precision': precision,
+                'recall': recall,
+                'f1': f1
+            }
+        
         trainer = Trainer(
             model=self.model,
             args=training_args,
-            train_dataset=tokenized_dataset,
+            train_dataset=tokenized_train,
+            eval_dataset=tokenized_eval,
+            compute_metrics=compute_metrics,
         )
         
         trainer.train()
         print("\nTraining complete!")
+        
+        # Validation 결과 출력
+        print("\n" + "="*60)
+        print("Final Validation Results:")
+        print("="*60)
+        eval_results = trainer.evaluate()
+        print(f"  Validation Loss:     {eval_results['eval_loss']:.4f}")
+        print(f"  Validation Accuracy: {eval_results.get('eval_accuracy', 0):.2%}")
+        print(f"  Validation F1:       {eval_results.get('eval_f1', 0):.4f}")
+        print(f"  Validation Precision:{eval_results.get('eval_precision', 0):.4f}")
+        print(f"  Validation Recall:   {eval_results.get('eval_recall', 0):.4f}")
+        print("="*60)
+        print("\n💡 Note: Best model (lowest eval_loss) has been loaded automatically")
         
         # Step 8: 모델 저장
         print("\nStep 8: Saving model...")

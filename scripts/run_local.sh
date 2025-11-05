@@ -36,7 +36,7 @@ export PYTHONPATH="${PWD}:${PYTHONPATH}"
 # 환경 변수 설정
 INPUT_DIR=${INPUT_DIR:-data/input}
 OUTPUT_DIR=${OUTPUT_DIR:-data/output}
-CLASSIFIER_PATH=${CLASSIFIER_PATH:-data/models/classifier.pth}
+CLASSIFIER_PATH=${CLASSIFIER_PATH:-data/models/classifier}
 OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
 
 echo "Configuration:"
@@ -115,7 +115,7 @@ echo ""
 
 START_TIME=$(date +%s)
 
-if [ -f "$CLASSIFIER_PATH" ]; then
+if [ -d "$CLASSIFIER_PATH" ]; then
     echo -e "${BLUE}Using trained classifier: $CLASSIFIER_PATH${NC}"
     python src/pipeline/predict.py \
         --input "$INPUT_DIR" \

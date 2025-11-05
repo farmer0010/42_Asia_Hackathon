@@ -11,6 +11,8 @@ torchvision==0.24.0
 
 # NLP & ML
 transformers==4.46.3
+torch==2.9.0
+accelerate>=0.26.0
 datasets==3.2.0
 scikit-learn==1.6.0
 numpy==1.26.4
