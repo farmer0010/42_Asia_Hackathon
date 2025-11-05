@@ -18,6 +18,9 @@ class JobStatusResponse(BaseModel):
     result: Optional[Any] = None # JSON/Dict 결과
 
 # --- (기존 검색 모델) ---
+class SearchResponse(BaseModel):
+    hits: List[Dict[str, Any]]
+
 class SearchHit(BaseModel):
     id: str
     filename: str

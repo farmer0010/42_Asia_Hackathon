@@ -153,8 +153,27 @@ def health_check():
         return schemas.HealthCheck(status="error", services=health_results)
     return schemas.HealthCheck(status="ok", services=health_results)
 
+@app.get("/search", tags=["Search"], response_model=schemas.SearchResponse)
+async def search_documents(query: str):
+    """
+    MeiliSearch를 사용한 전문 검색 엔드포인트.
+    frontend/script.js 가 이 API를 호출합니다.
+    """
+    if not meili_client:
+        log.error("MeiliSearch 클라이언트가 초기화되지 않았습니다.")
+        raise HTTPException(status_code=503, detail="Search service is not available")
 
-# ... (주석 처리된 /search 엔드포인트) ...
+    try:
+        # 이 파일(main.py) 상단에 이미 정의된 meili_client를 사용합니다.
+        index = meili_client.index("documents")
+        search_results = index.search(query)
+
+        # frontend(script.js) 가 기대하는 형식({"hits": [...]})으로 응답
+        return {"hits": search_results.get('hits', [])}
+
+    except Exception as e:
+        log.error(f"Search query '{query}' 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 @app.get("/job/{job_id}", status_code=status.HTTP_200_OK, response_model=schemas.JobStatusResponse)  # 🚨 [수정] 스키마 이름 변경
 async def get_job_status(job_id: str):
