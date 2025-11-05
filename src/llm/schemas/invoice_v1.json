@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": ["vendor", "invoice_date", "total_amount", "currency"],
+  "properties": {
+    "vendor": { "type": ["string", "null"] },
+    "invoice_date": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "total_amount": { "type": ["number", "null"] },
+    "currency": { "type": ["string", "null"] }
+  }
+}

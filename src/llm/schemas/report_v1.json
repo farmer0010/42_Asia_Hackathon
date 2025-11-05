@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": ["title", "date", "key_points"],
+  "properties": {
+    "title": { "type": ["string", "null"] },
+    "date": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "key_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 5
+    }
+  }
+}

@@ -1,0 +1,14 @@
+System: Extract resume fields as JSON:
+{
+  "person_name": "string or null",
+  "email": "string or null",
+  "phone": "string or null",
+  "years_experience": "number or null",
+  "skills": ["string", "..."]  // up to 10 items
+}
+Rules:
+- Return ONLY JSON.
+- skills: deduplicate; keep concise technical terms.
+- Use null if missing.
+Text:
+{TEXT}

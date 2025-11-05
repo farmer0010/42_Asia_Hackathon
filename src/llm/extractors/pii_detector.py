@@ -2,117 +2,110 @@ import re
 from typing import List, Dict
 from .smart_extractor import SmartExtractor
 
+WHITELIST_TYPES = {"PERSON_NAME", "PHONE", "EMAIL", "ADDRESS", "NATIONAL_ID", "PASSPORT", "THAI_ID"}
+
+def _line_has_phone_keyword(ln: str) -> bool:
+    t = ln.lower()
+    return any(k in t for k in ["phone", "tel", "contact", "전화", "연락"])
+
+
 class PIIDetector(SmartExtractor):
     """
-    개인 식별 정보(PII) 탐지기
-    - 정규식: 빠른 패턴 매칭 (이메일, 전화, ID)
-    - LLM: 복잡한 패턴 (이름, 주소)
+    개인식별정보(PII) 탐지:
+    - EMAIL/THAI_ID 등은 전역 정규식
+    - PHONE은 '전화/Phone/Tel/Contact' 키워드가 있는 라인에서만 허용(오탐 방지)
+    - LLM 보조로 PERSON_NAME/ADDRESS 보강
+    - 타입을 해커톤 스펙에 맞춰 통일
     """
-    
-    def __init__(self, ollama_url="http://localhost:11434"):
-        super().__init__(ollama_url)
-        
-        # 정규식 패턴 정의
+
+    def __init__(self, ollama_url="http://localhost:11434", model="gemma3:4b"):
+        super().__init__(ollama_url, model=model)
         self.patterns = {
-            "EMAIL": r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
-            "PHONE_NUMBER": r'[\+]?[0-9]{1,3}?[-.\s]?\(?[0-9]{1,4}\)?[-.\s]?[0-9]{3,4}[-.\s]?[0-9]{3,4}',
-            "THAI_ID": r'\d{1}-\d{4}-\d{5}-\d{2}-\d{1}',
-            "CREDIT_CARD": r'\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}',
+            "EMAIL": r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+            "THAI_ID": r"\b\d-\d{4}-\d{5}-\d{2}-\d\b",
+            "CREDIT_CARD": r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b",
         }
-    
+
     def detect(self, text: str, use_llm: bool = True) -> List[Dict]:
-        """
-        PII 탐지
-        
-        Args:
-            text: 탐지할 텍스트
-            use_llm: LLM 사용 여부 (False면 정규식만)
-        
-        Returns:
-            [{"type": "EMAIL", "text": "john@example.com"}, ...]
-        """
-        pii_list = []
-        
-        # 1. 정규식으로 빠른 탐지
-        pii_list.extend(self._detect_with_regex(text))
-        
-        # 2. LLM으로 복잡한 것 탐지 (선택적)
+        out: List[Dict] = []
+        out.extend(self._regex_email(text))
+        out.extend(self._regex_thaiid(text))
+        out.extend(self._regex_phone_contextual(text))
+        # 카드번호는 보고만 하거나 제외(필요시 타입 추가 가능)
+        # out.extend(self._regex_cc(text))
+
         if use_llm and text.strip():
-            pii_list.extend(self._detect_with_llm(text))
-        
-        # 중복 제거
-        return self._deduplicate(pii_list)
-    
-    def _detect_with_regex(self, text: str) -> List[Dict]:
-        """정규식 기반 PII 탐지"""
-        found = []
-        
-        for pii_type, pattern in self.patterns.items():
-            matches = re.findall(pattern, text)
-            for match in matches:
-                found.append({
-                    "type": pii_type,
-                    "text": match.strip()
-                })
-        
+            out.extend(self._llm_names_addresses(text[:1200]))
+
+        # 중복 제거 + 화이트리스트
+        uniq = []
+        seen = set()
+        for item in out:
+            t = item.get("type")
+            s = (t, (item.get("text") or "").strip().lower())
+            if t in WHITELIST_TYPES and s not in seen and item.get("text"):
+                seen.add(s)
+                uniq.append({"type": t, "text": item["text"].strip()})
+        return uniq
+
+    def _regex_email(self, text: str) -> List[Dict]:
+        return [{"type": "EMAIL", "text": m.group(0)} for m in re.finditer(self.patterns["EMAIL"], text)]
+
+    def _regex_thaiid(self, text: str) -> List[Dict]:
+        return [{"type": "THAI_ID", "text": m.group(0)} for m in re.finditer(self.patterns["THAI_ID"], text)]
+
+    def _regex_phone_contextual(self, text: str) -> List[Dict]:
+        found: List[Dict] = []
+        phone_re = re.compile(r"(?:\+?\d[\d()\s\-]{7,}\d)")
+        for ln in text.splitlines():
+            if _line_has_phone_keyword(ln):
+                for m in phone_re.finditer(ln):
+                    raw = m.group(0)
+                    digits = re.sub(r"\D", "", raw)
+                    if len(digits) >= 8:
+                        found.append({"type": "PHONE", "text": raw.strip()})
         return found
-    
-    def _detect_with_llm(self, text: str) -> List[Dict]:
-        """LLM 기반 PII 탐지 (이름, 주소)"""
-        # 텍스트가 너무 길면 앞부분만
-        text_snippet = text[:800]
-        
-        prompt = f"""Find personal identifiable information (PII) in this text.
+
+    def _llm_names_addresses(self, snippet: str) -> List[Dict]:
+        prompt = f"""Detect PII in the text snippet.
+
+Return ONLY JSON with two arrays:
+{{"names": [], "addresses": []}}
+
+- "names": real person full names (exclude organizations like Inc., Ltd., Co., Corp.)
+- "addresses": complete mailing addresses
 
 Text:
-{text_snippet}
-
-Extract only:
-- PERSON_NAME: people's full names
-- ADDRESS: complete addresses
-
-Output JSON only, no explanation:
-{{"names": [], "addresses": []}}"""
-        
+{snippet}
+"""
         try:
-            # 부모 클래스의 메서드 재사용!
-            response = self._call_ollama(prompt)
-            data = self._parse_json_response(response)
-            
-            found = []
-            
-            # 이름 추가
-            for name in data.get('names', []):
-                if name and len(name) > 1:  # 너무 짧으면 제외
-                    found.append({
-                        "type": "PERSON_NAME",
-                        "text": name
-                    })
-            
-            # 주소 추가
-            for addr in data.get('addresses', []):
-                if addr and len(addr) > 5:  # 너무 짧으면 제외
-                    found.append({
-                        "type": "ADDRESS",
-                        "text": addr
-                    })
-            
-            return found
-            
+            resp = self._call_ollama(prompt, max_tokens=400, temperature=0.0)
+            data = self._parse_json_loose(resp)
+            out: List[Dict] = []
+            for n in data.get("names", []):
+                if isinstance(n, str) and len(n.strip()) > 1:
+                    out.append({"type": "PERSON_NAME", "text": n.strip()})
+            for a in data.get("addresses", []):
+                if isinstance(a, str) and len(a.strip()) > 5:
+                    out.append({"type": "ADDRESS", "text": a.strip()})
+            return out
         except Exception as e:
             print(f"Warning: LLM PII detection failed: {e}")
             return []
-    
-    def _deduplicate(self, pii_list: List[Dict]) -> List[Dict]:
-        """중복 제거"""
-        seen = set()
-        unique = []
-        
-        for item in pii_list:
-            key = (item['type'], item['text'].lower())
-            if key not in seen:
-                seen.add(key)
-                unique.append(item)
-        
-        return unique
 
+    def _parse_json_loose(self, resp: str) -> Dict:
+        if not resp:
+            return {}
+        m = re.search(r"```json\s*(\{.*?\})\s*```", resp, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(1))
+            except Exception:
+                pass
+        m = re.search(r"\{.*\}", resp, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(0))
+            except Exception:
+                pass
+        return {}

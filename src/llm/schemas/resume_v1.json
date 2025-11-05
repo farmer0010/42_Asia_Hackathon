@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["person_name", "email", "phone", "years_experience", "skills"],
+  "properties": {
+    "person_name": { "type": ["string", "null"] },
+    "email": { "type": ["string", "null"] },
+    "phone": { "type": ["string", "null"] },
+    "years_experience": { "type": ["number", "null"] },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 10
+    }
+  }
+}

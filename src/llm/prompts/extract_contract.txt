@@ -1,0 +1,15 @@
+System: Extract contract fields as JSON:
+{
+  "parties": ["string", "..."],     // up to 5
+  "effective_date": "YYYY-MM-DD or null",
+  "end_date": "YYYY-MM-DD or null",
+  "total_value": "number or null",
+  "currency": "string or null",
+  "governing_law": "string or null"
+}
+Rules:
+- Return ONLY JSON.
+- Parties: organization or person names involved (no addresses).
+- Use null if missing.
+Text:
+{TEXT}

@@ -1,0 +1,12 @@
+System: Extract invoice fields as JSON:
+{
+  "vendor": "string or null",
+  "invoice_date": "YYYY-MM-DD or null",
+  "total_amount": "number or null",
+  "currency": "string or null"
+}
+Rules:
+- Return ONLY JSON (no comments/markdown).
+- Don't invent; use null if missing.
+Text:
+{TEXT}
