@@ -1,0 +1,33 @@
+# FastAPI & Celery Core
+fastapi
+uvicorn[standard]
+celery
+redis
+pydantic
+pydantic-settings # config.py에서 필요
+
+# AI & Data
+openai
+torch              # 🔴 [추가] ocr_ver.2 분류 모듈 실행에 필수
+transformers       # 🔴 [추가] ocr_ver.2 분류 모듈 실행에 필수
+scikit-learn       # 🔴 [추가] ocr_ver.2 분류 모듈 실행에 필수
+sentencepiece
+pdf2image
+paddlepaddle       # 🔴 ocr_ver.2 OCR 모듈용 (Dockerfile이 GPU 버전으로 교체)
+paddleocr          # 🔴 ocr_ver.2 OCR 모듈용
+opencv-python
+numpy
+jsonschema
+paddlex
+scipy
+PyMuPDF            # 🔴 PyMuPDF 빌드 (Dockerfile이 해결)
+
+# Database & Search
+qdrant-client
+meilisearch
+requests
+
+# Monitoring & Utils
+prometheus-fastapi-instrumentator
+loguru
+python-multipart

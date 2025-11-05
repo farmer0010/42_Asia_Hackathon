@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 환경 변수
+.env
+
+# Docker 데이터 (절대 포함 금지)
+redis_data/
+qdrant_data/
+meili_data/
+
+# 빌드에 필요 없는 대용량 폴더 (가장 중요)
+models/
+test_samples/
