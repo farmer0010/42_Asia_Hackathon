@@ -1,10 +1,41 @@
 import json
 import sys
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
+from datetime import datetime
 from src.llm.extractors.smart_extractor import SmartExtractor
 from src.llm.extractors.pii_detector import PIIDetector
 from src.llm.extractors.summarizer import DocumentSummarizer
+
+
+def calculate_compliance_level(pii_list: List[Dict]) -> Tuple[str, str]:
+    """
+    PII 처리 상태에 따라 compliance 레벨 계산
+    
+    Args:
+        pii_list: 탐지된 PII 리스트
+    
+    Returns:
+        (level, notes) - level: "full"/"partial"/"non_compliant", notes: 설명
+    """
+    if not pii_list:
+        return "full", "No personal identifiable information detected"
+    
+    # 모든 PII가 마스킹되었는지 확인
+    all_masked = all(
+        pii.get("masked") and "masking_error" not in pii 
+        for pii in pii_list
+    )
+    
+    if all_masked:
+        return "full", f"All {len(pii_list)} PII items detected and successfully masked"
+    else:
+        masked_count = sum(1 for pii in pii_list if pii.get("masked") and "masking_error" not in pii)
+        if masked_count == 0:
+            return "non_compliant", f"0/{len(pii_list)} PII items masked - masking failed"
+        else:
+            return "partial", f"Only {masked_count}/{len(pii_list)} PII items successfully masked"
+
 
 def convert_prediction_to_hackathon(prediction: Dict, extractor: SmartExtractor, pii_detector: PIIDetector, summarizer: DocumentSummarizer) -> Dict:
     """
@@ -28,14 +59,67 @@ def convert_prediction_to_hackathon(prediction: Dict, extractor: SmartExtractor,
         extracted = extractor.extract(prediction)
         result["extracted_data"] = extracted
     
-    # summary: report/contract 요약 (나중에 구현)
+    # summary: report/contract 요약
     if doc_type in ['report', 'contract']:
         summary = summarizer.summarize(full_text, doc_type)
         result["summary"] = summary
     
     # pii_detected: 모든 문서 탐지
     pii_list = pii_detector.detect(full_text, use_llm=True)
+    
+    # ✨ PII 마스킹 (에러 핸들링 포함)
+    for pii in pii_list:
+        try:
+            pii["masked"] = pii_detector.mask_text(pii["text"], pii["type"])
+        except Exception as e:
+            pii["masked"] = "***"  # 실패 시 기본값
+            pii["masking_error"] = str(e)
+    
     result["pii_detected"] = pii_list
+    
+    # ✨ 마스킹된 전체 텍스트 추가
+    if pii_list:
+        result["full_text_masked"] = pii_detector.mask_full_text(full_text, pii_list)
+    
+    # ✨ Compliance 레벨 계산
+    compliance_level, compliance_notes = calculate_compliance_level(pii_list)
+    
+    # 모든 PII가 마스킹되었는지 확인
+    all_masked = all(
+        pii.get("masked") and "masking_error" not in pii 
+        for pii in pii_list
+    )
+    
+    # ✨ GDPR/PDPA Compliance 정보 (조건부)
+    result["compliance"] = {
+        "compliance_level": compliance_level,
+        "compliance_notes": compliance_notes,
+        
+        "pii_handling": {
+            "detected": len(pii_list) > 0,
+            "count": len(pii_list),
+            "types_found": list(set(p["type"] for p in pii_list)) if pii_list else [],
+            "all_masked": all_masked,
+            "storage_policy": "not_stored_permanently"
+        },
+        
+        # 조건부: full compliance일 때만 true
+        "gdpr_compliant": compliance_level == "full",
+        "pdpa_compliant": compliance_level == "full",
+        
+        "data_minimization": True,
+        "purpose": "document_processing_only",
+        "can_be_deleted": True,
+        "processed_at": datetime.utcnow().isoformat() + "Z",
+        
+        # 전제 조건 명시
+        "assumptions": [
+            "Processing with user consent",
+            "No permanent storage of personal data",
+            "Right to deletion available on request",
+            "Processing for legitimate business purpose only"
+        ]
+    }
     
     return result
 

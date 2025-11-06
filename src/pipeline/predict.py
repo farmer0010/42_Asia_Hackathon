@@ -31,9 +31,13 @@ Total_Lines: {layout['features']['total_lines']}
 def process_single_document(image_path, ocr_vl, classifier=None):
     """
     단일 문서 처리: OCR-VL + 분류(선택)
+    
+    다국어 지원:
+    - OCR 자동 언어 감지
+    - 감지된 언어 정보를 분류기 및 LLM에 전달
     """
-    # Step 1: OCR-VL
-    ocr_result = ocr_vl.process_document(str(image_path))
+    # Step 1: OCR-VL (다국어 자동 감지)
+    ocr_result = ocr_vl.process_document(str(image_path), lang='auto')
     
     if 'error' in ocr_result:
         print(f"  ❌ OCR error: {ocr_result['error']}")
@@ -50,13 +54,14 @@ def process_single_document(image_path, ocr_vl, classifier=None):
             "confidence": 0.0
         }
     
-    # Step 3: 최종 JSON (LLM 팀에게 전달)
+    # Step 3: 최종 JSON (LLM에 전달)
     result = {
         "filename": Path(image_path).name,
         "full_text_ocr": ocr_result['full_text'],
         "ocr_confidence": ocr_result['confidence'],
         "layout": ocr_result['layout'],
         "classification": classification,
+        "detected_language": ocr_result.get('detected_language', 'en'),  # ✨ 추가!
         "processing_time": ocr_result['processing_time']
     }
     

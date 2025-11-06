@@ -36,8 +36,9 @@ class DocumentSummarizer(SmartExtractor):
         return ""
     
     def _summarize_report(self, text: str) -> str:
-        """보고서 요약"""
+        """보고서 요약 (다국어 지원)"""
         prompt = f"""Summarize this report document in 3-5 sentences.
+The document may be in English, Thai, Korean, Japanese, or other languages.
 
 Document text:
 {text}
@@ -47,7 +48,12 @@ Focus on:
 - Key findings or results
 - Important conclusions
 
-Summary (3-5 sentences, concise):"""
+Instructions:
+- If the document is in a non-English language, summarize in English
+- Preserve key terms in original language if needed (e.g., proper nouns, technical terms)
+- Be concise and clear
+
+Summary (3-5 sentences in English):"""
         
         try:
             response = self._call_ollama(prompt)
@@ -65,8 +71,9 @@ Summary (3-5 sentences, concise):"""
             return "Summary generation failed."
     
     def _summarize_contract(self, text: str) -> str:
-        """계약서 요약"""
+        """계약서 요약 (다국어 지원)"""
         prompt = f"""Summarize this contract document in 3-5 sentences.
+The document may be in English, Thai, Korean, Japanese, or other languages.
 
 Document text:
 {text}
@@ -77,7 +84,12 @@ Focus on:
 - Key terms or conditions
 - Duration or dates (if mentioned)
 
-Summary (3-5 sentences, concise):"""
+Instructions:
+- If the document is in a non-English language, summarize in English
+- Preserve party names and key terms in original language
+- Be concise and clear
+
+Summary (3-5 sentences in English):"""
         
         try:
             response = self._call_ollama(prompt)

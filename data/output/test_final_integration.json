@@ -1,0 +1,103 @@
+[
+  {
+    "filename": "sample4.jpg",
+    "classification": {
+      "doc_type": "unknown",
+      "confidence": 0.0
+    },
+    "full_text_ocr": "Adress:1234Lorem Ipsum,Do1or\nTe1123456-7890-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
+    "pii_detected": [
+      {
+        "type": "PHONE_NUMBER",
+        "text": "1123456-7890",
+        "masked": "11*****-**90"
+      }
+    ],
+    "full_text_masked": "Adress:1234Lorem Ipsum,Do1or\nTe11*****-**90-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
+    "compliance": {
+      "compliance_level": "full",
+      "compliance_notes": "All 1 PII items detected and successfully masked",
+      "pii_handling": {
+        "detected": true,
+        "count": 1,
+        "types_found": [
+          "PHONE_NUMBER"
+        ],
+        "all_masked": true,
+        "storage_policy": "not_stored_permanently"
+      },
+      "gdpr_compliant": true,
+      "pdpa_compliant": true,
+      "data_minimization": true,
+      "purpose": "document_processing_only",
+      "can_be_deleted": true,
+      "processed_at": "2025-11-06T01:42:12.250684Z",
+      "assumptions": [
+        "Processing with user consent",
+        "No permanent storage of personal data",
+        "Right to deletion available on request",
+        "Processing for legitimate business purpose only"
+      ]
+    },
+    "detected_language": "en"
+  },
+  {
+    "filename": "sample1.jpg",
+    "classification": {
+      "doc_type": "unknown",
+      "confidence": 0.0
+    },
+    "full_text_ocr": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameABC Expors td.\nConsignee Name:Xyz Importers Inc\nCompany Address123 Exponter StreeExpon City\nComsigneeAddress:456 ImporterStreetImport City\nPhoneNumbe1234567890\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:2234-56789012-3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
+    "pii_detected": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "2234-56789012-3456",
+        "masked": "**** **** **** 3456"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "1234567890",
+        "masked": "12******90"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "2234-56789012",
+        "masked": "22**-******12"
+      },
+      {
+        "type": "JAPAN_MY_NUMBER",
+        "text": "2234-56789012",
+        "masked": "****"
+      }
+    ],
+    "full_text_masked": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameABC Expors td.\nConsignee Name:Xyz Importers Inc\nCompany Address123 Exponter StreeExpon City\nComsigneeAddress:456 ImporterStreetImport City\nPhoneNumbe12******90\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:**** **** **** 3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
+    "compliance": {
+      "compliance_level": "full",
+      "compliance_notes": "All 4 PII items detected and successfully masked",
+      "pii_handling": {
+        "detected": true,
+        "count": 4,
+        "types_found": [
+          "JAPAN_MY_NUMBER",
+          "CREDIT_CARD",
+          "PHONE_NUMBER"
+        ],
+        "all_masked": true,
+        "storage_policy": "not_stored_permanently"
+      },
+      "gdpr_compliant": true,
+      "pdpa_compliant": true,
+      "data_minimization": true,
+      "purpose": "document_processing_only",
+      "can_be_deleted": true,
+      "processed_at": "2025-11-06T01:42:24.055459Z",
+      "assumptions": [
+        "Processing with user consent",
+        "No permanent storage of personal data",
+        "Right to deletion available on request",
+        "Processing for legitimate business purpose only"
+      ]
+    },
+    "detected_language": "en"
+  }
+]

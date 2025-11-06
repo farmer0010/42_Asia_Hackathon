@@ -1,3 +1,8 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
 # Python
 __pycache__/
 *.py[cod]
@@ -7,29 +12,43 @@ __pycache__/
 venv/
 env/
 ENV/
-*.egg-info/
-
-# Git
-.git/
-.gitignore
+.venv
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
-outputs/
-test_samples/
+# 문서
 docs/
 *.md
-!README_DOCKER.md
+!README.md
 
-# Models (큰 파일)
-models/*.pth
-models/*.pt
+# 데이터 (볼륨 마운트로 처리)
+data/input/*
+data/output/*
+data/models/*
+
+# 테스트 결과
+tests/__pycache__/
+*.pytest_cache/
+.coverage
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 임시 파일
+*.log
+*.tmp
+tmp/
+temp/
+
+# Docker
+docker/
+Dockerfile
+docker-compose*.yml
+.dockerignore

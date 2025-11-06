@@ -82,11 +82,12 @@ class SmartExtractor:
         return extracted
     
     def _build_prompt(self, prediction: Dict[str, Any]) -> str:
-        """프롬프트 생성"""
+        """프롬프트 생성 (다국어 지원)"""
         doc_type = prediction.get('classification', {}).get('doc_type', 'unknown')
         full_text = prediction.get('full_text_ocr', '')
         layout = prediction.get('layout', {})
         sections = layout.get('sections', [])
+        detected_lang = prediction.get('detected_language', 'en')
         
         # 스키마 가져오기
         schema = self.schemas.get(doc_type, {})
@@ -101,12 +102,23 @@ class SmartExtractor:
                 if text:
                     key_values.append(text)
         
-        # 프롬프트 구성
-        prompt = f"""You are a document data extraction expert.
+        # 언어별 힌트
+        lang_hints = {
+            'en': 'English',
+            'thai': 'Thai (ภาษาไทย)',
+            'korean': 'Korean (한국어)',
+            'japan': 'Japanese (日本語)'
+        }
+        detected_lang_name = lang_hints.get(detected_lang, 'Unknown')
+        
+        # 프롬프트 구성 (다국어 대응)
+        prompt = f"""You are a multilingual document data extraction expert.
+You can process documents in English, Thai, Korean, Japanese, and other languages.
 
 Document Type: {description} ({doc_type})
+Detected Language: {detected_lang_name}
 
-Full OCR Text (first 800 chars):
+Full OCR Text (first 800 chars - may contain {detected_lang_name} text):
 {full_text[:800]}
 
 Key Information Found:
@@ -118,8 +130,11 @@ Extract the following fields as a JSON object:
 Rules:
 1. Output ONLY valid JSON, no explanation
 2. Use null for missing fields
-3. Keep original format (dates, numbers)
-4. Be concise
+3. Keep original format (dates, numbers) and preserve original language in values
+4. Field names should be in English, but values can be in the document's original language ({detected_lang_name})
+5. If text contains mixed languages, extract the primary language value
+6. For non-ASCII text (Thai, Korean, Japanese), preserve the original characters
+7. Be concise and accurate
 
 JSON Output:"""
         

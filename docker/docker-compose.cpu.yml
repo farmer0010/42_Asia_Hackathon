@@ -37,12 +37,19 @@ services:
     environment:
       - OLLAMA_URL=http://ollama:11434
       - PYTHONUNBUFFERED=1
+      - USE_GPU=false
     volumes:
       - ../data/input:/app/data/input              # 입력 폴더
       - ../data/output:/app/data/output            # 출력 폴더
       - ../data/models:/app/data/models            # 학습된 모델
     working_dir: /app
     command: bash scripts/run_pipeline.sh
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   ollama_models:
