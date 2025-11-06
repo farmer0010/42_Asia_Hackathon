@@ -117,9 +117,73 @@ class OCRVLModule:
         
         return 'en'  # 실패하면 기본값
     
+    def _should_preprocess(self, image_path):
+        """
+        문서가 전처리가 필요한지 자동 판단 (품질 기반)
+        
+        Args:
+            image_path: 이미지 파일 경로
+            
+        Returns:
+            bool: True = 전처리 필요 (저품질/손글씨), False = 전처리 불필요 (고품질/인쇄)
+        """
+        try:
+            import cv2
+            import numpy as np
+            
+            # 이미지 로드
+            if isinstance(image_path, str):
+                img = cv2.imread(image_path)
+            else:
+                img = image_path
+            
+            if img is None:
+                return True  # 안전하게 전처리 적용
+            
+            # 그레이스케일 변환
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # 1. 선명도 측정 (Laplacian variance - 높을수록 선명)
+            laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+            
+            # 2. 대비 측정 (표준편차 - 높을수록 대비 좋음)
+            contrast = gray.std()
+            
+            # 3. 밝기 측정
+            brightness = gray.mean()
+            
+            # 품질 판단 임계값
+            SHARPNESS_THRESHOLD = 100   # 선명도
+            CONTRAST_THRESHOLD = 50     # 대비
+            
+            is_blurry = laplacian_var < SHARPNESS_THRESHOLD
+            is_low_contrast = contrast < CONTRAST_THRESHOLD
+            is_too_dark = brightness < 50
+            is_too_bright = brightness > 230
+            
+            # 저품질 조건
+            needs_preprocessing = is_blurry or is_low_contrast or is_too_dark or is_too_bright
+            
+            # 로그 출력
+            print(f"  📊 이미지 품질 분석:")
+            print(f"     선명도: {laplacian_var:.1f} (임계값: {SHARPNESS_THRESHOLD})")
+            print(f"     대비: {contrast:.1f} (임계값: {CONTRAST_THRESHOLD})")
+            print(f"     밝기: {brightness:.1f}")
+            
+            if needs_preprocessing:
+                print(f"  🖊️  저품질/손글씨 감지 → 전처리 적용")
+            else:
+                print(f"  ✨ 고품질 인쇄 감지 → 원본 사용 (전처리 스킵)")
+            
+            return needs_preprocessing
+            
+        except Exception as e:
+            print(f"  ⚠️  품질 분석 실패: {e}, 안전하게 전처리 적용")
+            return True  # 실패 시 안전하게 전처리 적용
+    
     def _preprocess_for_handwriting(self, image_path):
         """
-        손글씨 인식을 위한 이미지 전처리
+        손글씨 인식을 위한 이미지 전처리 (저품질 문서용)
         
         Returns:
             numpy.ndarray: 전처리된 이미지 또는 None
@@ -140,30 +204,23 @@ class OCRVLModule:
             # 1. 그레이스케일 변환
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            # 2. 노이즈 제거 (Gaussian Blur)
+            # 2. 노이즈 제거 (가벼운 블러)
             denoised = cv2.GaussianBlur(gray, (3, 3), 0)
             
-            # 3. 대비 증가 (CLAHE)
+            # 3. 대비 증가 (CLAHE - 보수적 설정)
             clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
             enhanced = clahe.apply(denoised)
             
-            # 4. 샤프닝 (선명도 향상)
-            kernel = np.array([[-1,-1,-1],
-                              [-1, 9,-1],
-                              [-1,-1,-1]])
+            # 4. 부드러운 샤프닝 (과도한 샤프닝 방지)
+            kernel = np.array([[0, -1, 0],
+                              [-1, 5, -1],
+                              [0, -1, 0]])  # 더 부드러운 커널
             sharpened = cv2.filter2D(enhanced, -1, kernel)
             
-            # 5. 적응형 이진화
-            binary = cv2.adaptiveThreshold(
-                sharpened,
-                255,
-                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv2.THRESH_BINARY,
-                11,  # 블록 크기
-                2    # C 상수
-            )
+            # 5. 이진화는 생략 (정보 손실 방지)
+            # 저품질 문서도 그레이스케일 유지가 더 나음
             
-            return binary
+            return sharpened  # binary 대신 sharpened 반환
             
         except Exception as e:
             print(f"  ⚠️  Handwriting preprocessing failed: {e}")
@@ -197,11 +254,14 @@ class OCRVLModule:
                 detected_lang = lang
                 print(f"  📝 Using specified language: {detected_lang.upper()}")
             
-            # Step 2: 손글씨 전처리 (옵션)
+            # Step 2: 품질 기반 전처리 (스마트 전처리)
             processed_image = None
             if self.enable_handwriting:
-                print(f"  🖊️  Applying handwriting enhancement...")
-                processed_image = self._preprocess_for_handwriting(image_path)
+                # 품질 분석 후 조건부 전처리
+                if self._should_preprocess(image_path):
+                    processed_image = self._preprocess_for_handwriting(image_path)
+                else:
+                    processed_image = None  # 원본 사용
             
             # Step 3: 해당 언어 OCR 실행
             print(f"  🚀 Processing with {detected_lang.upper()} OCR...")
