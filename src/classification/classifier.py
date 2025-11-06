@@ -113,9 +113,9 @@ class DocumentClassifier:
         # Step 4: Tokenization
         print("\nStep 4: Tokenizing text...")
         
-        # 다국어 처리를 위해 긴 토큰 길이 사용 (한글, 태국어는 토큰 수가 많음)
-        max_length = 768
-        print(f"  Using max_length: {max_length} (optimized for multilingual text)")
+        # 다국어 처리를 위해 긴 토큰 길이 사용 (XLM-RoBERTa 최대 길이: 512)
+        max_length = 512
+        print(f"  Using max_length: {max_length} (XLM-RoBERTa limit)")
         
         def tokenize_function(examples):
             return self.tokenizer(
@@ -238,8 +238,8 @@ class DocumentClassifier:
         if self.model is None:
             raise Exception("Error: Model not loaded! Call load_model() first.")
         
-        # 다국어 처리를 위한 긴 토큰 길이
-        max_length = 768
+        # 다국어 처리를 위한 긴 토큰 길이 (XLM-RoBERTa 최대: 512)
+        max_length = 512
         
         inputs = self.tokenizer(
             text,
