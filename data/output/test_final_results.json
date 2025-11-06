@@ -5,26 +5,26 @@
       "doc_type": "receipt",
       "confidence": 0.95
     },
-    "full_text_ocr": "Receipt\nAdress:1234 Lorem Ipsum,Dolor\nTe1:123-456-7890\nDate:01-01-2018\n10:35\nLorem\n6.50\nIpsum\n7.50\nDolor Sit\n48.00\nAmet\n9.30\nConsectetur\n11.90\nAdipiscing Elit\n1.20\nSedDo\n0.40\nAMOUNT\n84.80\nSub-total\n76.80\nSales Tax\n8.00\nBalance\n84.80",
+    "full_text_ocr": "Adress:1234Lorem Ipsum,Do1or\nTe1123456-7890-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
     "extracted_data": {
-      "merchant_name": "Lorem Ipsum,Dolor",
-      "purchase_date": "01-01-2018",
-      "total_amount": 84.8,
+      "merchant_name": "1234Lorem Ipsum,Dolor",
+      "purchase_date": "0101-2018",
+      "total_amount": "84.80",
       "payment_method": null
     },
     "pii_detected": [
       {
         "type": "PHONE_NUMBER",
-        "text": "123-456-7890",
-        "masked": "12*-***-**90"
+        "text": "1123456-7890",
+        "masked": "11*****-**90"
       },
       {
         "type": "ADDRESS",
-        "text": "1234 Lorem Ipsum,Dolor",
+        "text": "1234Lorem Ipsum,Do1or",
         "masked": "123***"
       }
     ],
-    "full_text_masked": "Receipt\nAdress:123***\nTe1:12*-***-**90\nDate:01-01-2018\n10:35\nLorem\n6.50\nIpsum\n7.50\nDolor Sit\n48.00\nAmet\n9.30\nConsectetur\n11.90\nAdipiscing Elit\n1.20\nSedDo\n0.40\nAMOUNT\n84.80\nSub-total\n76.80\nSales Tax\n8.00\nBalance\n84.80",
+    "full_text_masked": "Adress:123***\nTe11*****-**90-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
     "compliance": {
       "compliance_level": "full",
       "compliance_notes": "All 2 PII items detected and successfully masked",
@@ -43,7 +43,7 @@
       "data_minimization": true,
       "purpose": "document_processing_only",
       "can_be_deleted": true,
-      "processed_at": "2025-11-06T00:10:59.097848Z",
+      "processed_at": "2025-11-06T03:36:18.306281Z",
       "assumptions": [
         "Processing with user consent",
         "No permanent storage of personal data",
@@ -58,57 +58,57 @@
       "doc_type": "invoice",
       "confidence": 0.95
     },
-    "full_text_ocr": "Commercial Invoice\nInvoice Number:\nCI2023-001\nInvoice Date:\nSeptember30.2030\nExporter Information\nImporter Information\nCompany Name: ABC Exports Ltd.\nConsignee Name:XYZ Importers Inc.\nCompany Address:123 Exporter Street, Export City\nConsignee Address:456 Importer Street, Import City\nPhone Number:(123)456-7890\nDestination Country: Important\nEmail: info@abcexports.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):S13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBankAccount Number:1234-5678-9012-3456\nPayee Name:ABC Exports Ltd.\nDate : September 30, 2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nXYZ Importers Inc.",
+    "full_text_ocr": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameABC Expors td.\nConsignee Name:Xyz Importers Inc\nCompany Address123 Exponter StreeExpon City\nComsigneeAddress:456 ImporterStreetImport City\nPhoneNumbe1234567890\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:2234-56789012-3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
     "extracted_data": {
-      "invoice_number": "CI2023-001",
-      "invoice_date": "September30.2030",
-      "vendor_name": "ABC Exports Ltd.",
-      "total_amount": 13000.0,
+      "invoice_number": "2023.001",
+      "invoice_date": "September30.2050",
+      "vendor_name": "ABC Expors td.",
+      "total_amount": "13000.00",
       "currency": "USD"
     },
     "pii_detected": [
       {
-        "type": "EMAIL",
-        "text": "info@abcexports.com",
-        "masked": "i***@a***.com"
-      },
-      {
-        "type": "PHONE_NUMBER",
-        "text": "123)456-7890",
-        "masked": "12*)***-**90"
-      },
-      {
-        "type": "PHONE_NUMBER",
-        "text": "1234-5678-9012",
-        "masked": "12**-****-**12"
-      },
-      {
         "type": "CREDIT_CARD",
-        "text": "1234-5678-9012-3456",
+        "text": "2234-56789012-3456",
         "masked": "**** **** **** 3456"
       },
       {
-        "type": "PERSON_NAME",
-        "text": "ABC Exports Ltd.",
-        "masked": "A*** E*** L***"
+        "type": "PHONE_NUMBER",
+        "text": "1234567890",
+        "masked": "12******90"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "2234-56789012",
+        "masked": "22**-******12"
+      },
+      {
+        "type": "JAPAN_MY_NUMBER",
+        "text": "2234-56789012",
+        "masked": "****"
       },
       {
         "type": "PERSON_NAME",
-        "text": "XYZ Importers Inc.",
+        "text": "Xyz Importers Inc",
         "masked": "X*** I*** I***"
       },
       {
+        "type": "PERSON_NAME",
+        "text": "ABC Expors td.",
+        "masked": "A*** E*** t***"
+      },
+      {
         "type": "ADDRESS",
-        "text": "123 Exporter Street, Export City",
+        "text": "123 Exponter StreeExpon City",
         "masked": "123***"
       },
       {
         "type": "ADDRESS",
-        "text": "456 Importer Street, Import City",
+        "text": "456 ImporterStreetImport City",
         "masked": "456***"
       }
     ],
-    "full_text_masked": "Commercial Invoice\nInvoice Number:\nCI2023-001\nInvoice Date:\nSeptember30.2030\nExporter Information\nImporter Information\nCompany Name: A*** E*** L***\nConsignee Name:X*** I*** I***\nCompany Address:123***\nConsignee Address:456***\nPhone Number:(12*)***-**90\nDestination Country: Important\nEmail: i***@a***.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):S13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBankAccount Number:**** **** **** 3456\nPayee Name:A*** E*** L***\nDate : September 30, 2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nX*** I*** I***",
+    "full_text_masked": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameA*** E*** t***\nConsignee Name:X*** I*** I***\nCompany Address123***\nComsigneeAddress:456***\nPhoneNumbe12******90\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:**** **** **** 3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
     "compliance": {
       "compliance_level": "full",
       "compliance_notes": "All 8 PII items detected and successfully masked",
@@ -116,11 +116,11 @@
         "detected": true,
         "count": 8,
         "types_found": [
-          "PHONE_NUMBER",
-          "PERSON_NAME",
           "CREDIT_CARD",
+          "PHONE_NUMBER",
           "ADDRESS",
-          "EMAIL"
+          "JAPAN_MY_NUMBER",
+          "PERSON_NAME"
         ],
         "all_masked": true,
         "storage_policy": "not_stored_permanently"
@@ -130,7 +130,7 @@
       "data_minimization": true,
       "purpose": "document_processing_only",
       "can_be_deleted": true,
-      "processed_at": "2025-11-06T00:11:08.534204Z",
+      "processed_at": "2025-11-06T03:36:28.536306Z",
       "assumptions": [
         "Processing with user consent",
         "No permanent storage of personal data",
@@ -145,36 +145,21 @@
       "doc_type": "receipt",
       "confidence": 0.95
     },
-    "full_text_ocr": "SUPERMARKET\nLorem ipsum 258\nTel+45646898702\nCity Index02025\nCashier.\nMenager:\nEric Steer\n#3\nNamt\nOf\nPice\nLoremipsum\n$9.20\nLorem ipsum dolor sit\n1\n$19.20\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum dolorsit\n1\n$15.00\nLorem ipsum\n1\n$19.20\nSub Total\n$107.60\nHSYO\nCHANCE\n$200.00\n$92.40\nClad to see you again\nTHANK YOU!\nmodtal",
+    "full_text_ocr": "SUPERMARXET\n5bTo\n$107.60",
     "extracted_data": {
-      "merchant_name": "Lorem ipsum 258",
+      "merchant_name": "SUPERMARXET",
       "purchase_date": null,
       "total_amount": "$107.60",
-      "payment_method": "$200.00"
+      "payment_method": null
     },
-    "pii_detected": [
-      {
-        "type": "PHONE_NUMBER",
-        "text": "+45646898702",
-        "masked": "+*5*4*****02"
-      },
-      {
-        "type": "PERSON_NAME",
-        "text": "Eric Steer",
-        "masked": "E*** S***"
-      }
-    ],
-    "full_text_masked": "SUPERMARKET\nLorem ipsum 258\nTel+*5*4*****02\nCity Index02025\nCashier.\nMenager:\nE*** S***\n#3\nNamt\nOf\nPice\nLoremipsum\n$9.20\nLorem ipsum dolor sit\n1\n$19.20\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum dolorsit\n1\n$15.00\nLorem ipsum\n1\n$19.20\nSub Total\n$107.60\nHSYO\nCHANCE\n$200.00\n$92.40\nClad to see you again\nTHANK YOU!\nmodtal",
+    "pii_detected": [],
     "compliance": {
       "compliance_level": "full",
-      "compliance_notes": "All 2 PII items detected and successfully masked",
+      "compliance_notes": "No personal identifiable information detected",
       "pii_handling": {
-        "detected": true,
-        "count": 2,
-        "types_found": [
-          "PHONE_NUMBER",
-          "PERSON_NAME"
-        ],
+        "detected": false,
+        "count": 0,
+        "types_found": [],
         "all_masked": true,
         "storage_policy": "not_stored_permanently"
       },
@@ -183,7 +168,7 @@
       "data_minimization": true,
       "purpose": "document_processing_only",
       "can_be_deleted": true,
-      "processed_at": "2025-11-06T00:11:13.963873Z",
+      "processed_at": "2025-11-06T03:36:32.129745Z",
       "assumptions": [
         "Processing with user consent",
         "No permanent storage of personal data",
@@ -198,63 +183,78 @@
       "doc_type": "receipt",
       "confidence": 0.95
     },
-    "full_text_ocr": "SA\nMalaysia Invoice\nInvoice no.:\n100\nInvoice date:\nJul 13th, 2021\nDue:\nFeb 13th2021\nFrom\nBill to\nSaldo Apps\nShepard corp.\nJohn Smith\nshepard@mail.com\nwiz@saldoapps.com\n80296979597\n80296979597\nNorth str., 32, Chicago, USA\nsaldoapps.com\nFirst str.,2832, Chicago, USA\nShipto\nNorth str., 32, Chicago, USA\nTrack #:RO80296979597\nDESCRIPTION\nRATE, CADA\nQTY\nTAX\nDISC\nAMOUNT, CADA\nPrototype\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPrototype-based programming is a style\nof object-oriented programming\nDesign\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPayment instruction\nSubtotal:\nUSD8000.00\nPaypal email\nDiscount (20%):\nUSD 0.00\nwiz@saldoapps.com\nShipping Cost:\nUSD 0.00\nMake checks payable to\nSales Tax:\nUSD 450.00\nJohn Smith\nTotal:\nUSD8,480.00\nBank Transfer\nAmount paid:\nUSD 0.00\nRouting (ABA):061120084\nBalance Due:\nUSD8,480.00\nNotes\nPrototype-based programming is a style of\nobject-oriented programming in which behaviour",
+    "full_text_ocr": "Malaysia Invoice\nnca no\nLDO\no\n.202\n:ona\nfob32021\nFrom\nBill'tio,\nSaldo Apps\nShepard corp...\nJohin smlth.\nshopordmatcom\n80206970597\n80200079507\nhst32Chkgo.t$A\nsadoopps.com\nFusts28-32ChcogUSA\nShip.to\nhstr32Chkgo$A\nk#R080286970507\n./\n20,230,450.00\n2000\n120.50\n2050%\n20,230,450.00\n.fotypo-batepoganngty\ncotign\n2000,\n050\n20230450.00\nPaymontinstruction\nsubtotat:\nUSD6000.00\nPoypalomoi,\nDlscoun20x\nw@sokooppt.com\n:oo0asn\nMkochockspybol\nSaosta\ns0450.00\no$mth\nTotaE\nAnou pokt\nBankTranstor\nRoutgAB0n20084\nBolanco Duo\nUSD8,480.00\nNotos\nPrototypobasodprogromnngostyloo!\nobect-orientedpogrommang nwtchbchavou",
     "extracted_data": {
-      "merchant_name": "Shepard corp.",
-      "purchase_date": "Jul 13th, 2021",
+      "merchant_name": "Saldo Apps",
+      "purchase_date": null,
       "total_amount": "USD8,480.00",
-      "payment_method": null
+      "payment_method": "BankTranstor"
     },
     "pii_detected": [
       {
         "type": "EMAIL",
-        "text": "shepard@mail.com",
-        "masked": "s***@m***.com"
-      },
-      {
-        "type": "EMAIL",
-        "text": "wiz@saldoapps.com",
-        "masked": "w***@s***.com"
-      },
-      {
-        "type": "PHONE_NUMBER",
-        "text": "80296979597",
-        "masked": "80*******97"
-      },
-      {
-        "type": "PHONE_NUMBER",
-        "text": "061120084",
-        "masked": "*6****084"
+        "text": "w@sokooppt.com",
+        "masked": "w@s***.com"
       },
       {
         "type": "CREDIT_CARD",
-        "text": "96979597\n80296979",
-        "masked": "**** **** **** 6979"
+        "text": "06970597\n80200079",
+        "masked": "**** **** **** 0079"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "80206970597",
+        "masked": "8******0*97"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "80200079507",
+        "masked": "8****0***07"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "080286970507",
+        "masked": "****8***0*07"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "450.00\n2000\n120",
+        "masked": "45*.**\n****\n*20"
+      },
+      {
+        "type": "PHONE_NUMBER",
+        "text": "050\n20230450",
+        "masked": "*5*\n****0*50"
+      },
+      {
+        "type": "JAPAN_MY_NUMBER",
+        "text": "06970597\n8020",
+        "masked": "****"
+      },
+      {
+        "type": "JAPAN_MY_NUMBER",
+        "text": "080286970507",
+        "masked": "****"
       },
       {
         "type": "PERSON_NAME",
         "text": "John Smith",
         "masked": "J*** S***"
-      },
-      {
-        "type": "ADDRESS",
-        "text": "North str., 32, Chicago, USA",
-        "masked": "Nor***"
       }
     ],
-    "full_text_masked": "SA\nMalaysia Invoice\nInvoice no.:\n100\nInvoice date:\nJul 13th, 2021\nDue:\nFeb 13th2021\nFrom\nBill to\nSaldo Apps\nShepard corp.\nJ*** S***\ns***@m***.com\nw***@s***.com\n802**** **** **** 6979597\nNor***\nsaldoapps.com\nFirst str.,2832, Chicago, USA\nShipto\nNor***\nTrack #:RO80*******97\nDESCRIPTION\nRATE, CADA\nQTY\nTAX\nDISC\nAMOUNT, CADA\nPrototype\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPrototype-based programming is a style\nof object-oriented programming\nDesign\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPayment instruction\nSubtotal:\nUSD8000.00\nPaypal email\nDiscount (20%):\nUSD 0.00\nw***@s***.com\nShipping Cost:\nUSD 0.00\nMake checks payable to\nSales Tax:\nUSD 450.00\nJ*** S***\nTotal:\nUSD8,480.00\nBank Transfer\nAmount paid:\nUSD 0.00\nRouting (ABA):*6****084\nBalance Due:\nUSD8,480.00\nNotes\nPrototype-based programming is a style of\nobject-oriented programming in which behaviour",
+    "full_text_masked": "Malaysia Invoice\nnca no\nLDO\no\n.202\n:ona\nfob32021\nFrom\nBill'tio,\nSaldo Apps\nShepard corp...\nJohin smlth.\nshopordmatcom\n802**** **** **** 0079507\nhst32Chkgo.t$A\nsadoopps.com\nFusts28-32ChcogUSA\nShip.to\nhstr32Chkgo$A\nk#R****8***0*07\n./\n20,230,45*.**\n****\n*20.50\n2050%\n20,230,450.00\n.fotypo-batepoganngty\ncotign\n2000,\n*5*\n****0*50.00\nPaymontinstruction\nsubtotat:\nUSD6000.00\nPoypalomoi,\nDlscoun20x\nw@s***.com\n:oo0asn\nMkochockspybol\nSaosta\ns0450.00\no$mth\nTotaE\nAnou pokt\nBankTranstor\nRoutgAB0n20084\nBolanco Duo\nUSD8,480.00\nNotos\nPrototypobasodprogromnngostyloo!\nobect-orientedpogrommang nwtchbchavou",
     "compliance": {
       "compliance_level": "full",
-      "compliance_notes": "All 7 PII items detected and successfully masked",
+      "compliance_notes": "All 10 PII items detected and successfully masked",
       "pii_handling": {
         "detected": true,
-        "count": 7,
+        "count": 10,
         "types_found": [
-          "PHONE_NUMBER",
-          "PERSON_NAME",
+          "EMAIL",
           "CREDIT_CARD",
-          "ADDRESS",
-          "EMAIL"
+          "PHONE_NUMBER",
+          "JAPAN_MY_NUMBER",
+          "PERSON_NAME"
         ],
         "all_masked": true,
         "storage_policy": "not_stored_permanently"
@@ -264,7 +264,7 @@
       "data_minimization": true,
       "purpose": "document_processing_only",
       "can_be_deleted": true,
-      "processed_at": "2025-11-06T00:11:22.300959Z",
+      "processed_at": "2025-11-06T03:36:39.402339Z",
       "assumptions": [
         "Processing with user consent",
         "No permanent storage of personal data",

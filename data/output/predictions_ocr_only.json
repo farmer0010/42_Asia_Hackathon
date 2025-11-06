@@ -1,115 +1,84 @@
 [
   {
     "filename": "sample4.jpg",
-    "full_text_ocr": "Receipt\nAdress:1234 Lorem Ipsum,Dolor\nTe1:123-456-7890\nDate:01-01-2018\n10:35\nLorem\n6.50\nIpsum\n7.50\nDolor Sit\n48.00\nAmet\n9.30\nConsectetur\n11.90\nAdipiscing Elit\n1.20\nSedDo\n0.40\nAMOUNT\n84.80\nSub-total\n76.80\nSales Tax\n8.00\nBalance\n84.80",
-    "ocr_confidence": 0.9915411450244762,
+    "full_text_ocr": "Adress:1234Lorem Ipsum,Do1or\nTe1123456-7890-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
+    "ocr_confidence": 0.8880241091052691,
     "layout": {
-      "title": "Receipt",
+      "title": null,
       "sections": [
         {
           "type": "key_value",
-          "text": "Adress:1234 Lorem Ipsum,Dolor",
+          "text": "Adress:1234Lorem Ipsum,Do1or",
           "position": [
-            228.0,
-            127.0
+            225.0,
+            124.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Te1:123-456-7890",
+          "text": "Date:0101-2018)",
           "position": [
-            227.0,
-            158.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Date:01-01-2018",
-          "position": [
-            227.0,
-            207.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "10:35",
-          "position": [
-            502.0,
-            206.0
+            214.0,
+            203.0
           ]
         },
         {
           "type": "key_value",
           "text": "AMOUNT",
           "position": [
-            220.0,
-            508.0
+            216.0,
+            505.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Sub-total",
+          "text": "Sub total",
           "position": [
-            218.0,
-            558.0
+            213.0,
+            556.0
           ]
         }
       ],
       "features": {
         "has_table": true,
-        "num_key_value_pairs": 6,
-        "text_density": 0.27,
-        "total_lines": 27
+        "num_key_value_pairs": 4,
+        "text_density": 0.24,
+        "total_lines": 24
       }
     },
     "classification": {
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 2.8020570278167725
+    "detected_language": "en",
+    "processing_time": 6.482754230499268
   },
   {
     "filename": "sample1.jpg",
-    "full_text_ocr": "Commercial Invoice\nInvoice Number:\nCI2023-001\nInvoice Date:\nSeptember30.2030\nExporter Information\nImporter Information\nCompany Name: ABC Exports Ltd.\nConsignee Name:XYZ Importers Inc.\nCompany Address:123 Exporter Street, Export City\nConsignee Address:456 Importer Street, Import City\nPhone Number:(123)456-7890\nDestination Country: Important\nEmail: info@abcexports.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):S13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBankAccount Number:1234-5678-9012-3456\nPayee Name:ABC Exports Ltd.\nDate : September 30, 2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nXYZ Importers Inc.",
-    "ocr_confidence": 0.9721854659063476,
+    "full_text_ocr": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameABC Expors td.\nConsignee Name:Xyz Importers Inc\nCompany Address123 Exponter StreeExpon City\nComsigneeAddress:456 ImporterStreetImport City\nPhoneNumbe1234567890\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:2234-56789012-3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
+    "ocr_confidence": 0.815983445036645,
     "layout": {
-      "title": "Commercial Invoice",
+      "title": "Commercial",
       "sections": [
         {
           "type": "key_value",
-          "text": "Commercial Invoice",
+          "text": "Invoice",
           "position": [
-            47.0,
-            63.0
+            219.0,
+            68.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Invoice Number:",
+          "text": "InvoceDater",
           "position": [
-            391.0,
-            75.0
+            388.0,
+            81.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Invoice Date:",
-          "position": [
-            391.0,
-            91.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Company Name: ABC Exports Ltd.",
-          "position": [
-            43.0,
-            184.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Consignee Name:XYZ Importers Inc.",
+          "text": "Consignee Name:Xyz Importers Inc",
           "position": [
             341.0,
             183.0
@@ -117,210 +86,132 @@
         },
         {
           "type": "key_value",
-          "text": "Company Address:123 Exporter Street, Export City",
+          "text": "ComsigneeAddress:456 ImporterStreetImport City",
           "position": [
-            43.0,
-            200.0
+            339.0,
+            199.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Consignee Address:456 Importer Street, Import City",
+          "text": "Deittnation Country:mportant",
           "position": [
             340.0,
-            200.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Phone Number:(123)456-7890",
-          "position": [
-            43.0,
             215.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Destination Country: Important",
+          "text": "Descriptiono Goods",
           "position": [
-            340.0,
-            214.0
+            80.0,
+            325.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Email: info@abcexports.com",
+          "text": "Sub Total,",
           "position": [
-            42.0,
-            230.0
+            370.0,
+            423.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Customs Declaration Number:CDN-2023-001",
+          "text": "Tott Amount Duein UsDs13.000.00",
           "position": [
-            43.0,
-            246.0
+            40.0,
+            458.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Item Details:",
+          "text": "BankAcountNumber:2234-56789012-3456",
           "position": [
-            41.0,
-            300.0
+            39.0,
+            613.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Currency:USD",
-          "position": [
-            43.0,
-            431.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Sub Total:",
-          "position": [
-            373.0,
-            428.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Exchange Rate:1.00",
-          "position": [
-            43.0,
-            446.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Total Amount Due (In USD):S13,000.00",
-          "position": [
-            42.0,
-            461.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Shipping Charges:",
-          "position": [
-            375.0,
-            461.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payment Method:",
-          "position": [
-            43.0,
-            577.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payment Method:Wire Transfer",
-          "position": [
-            43.0,
-            598.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "BankAccount Number:1234-5678-9012-3456",
-          "position": [
-            43.0,
-            614.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payee Name:ABC Exports Ltd.",
-          "position": [
-            42.0,
-            630.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Date : September 30, 2030",
+          "text": "Date:September30.2050",
           "position": [
             466.0,
-            684.0
+            683.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Additional Notes:",
-          "position": [
-            41.0,
-            702.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Exporter Notes:Please handle with care during shipping.",
+          "text": "AdaltionalNotei",
           "position": [
             43.0,
-            728.0
+            703.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Shipping Date:September 30,2030 Payment",
+          "text": "Expoter Notes:Plesse handle with care duting shipping",
           "position": [
             44.0,
-            745.0
+            727.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Due Date:October 15,2030",
+          "text": "Shipping Date:Scptember30.2030Payment",
           "position": [
             44.0,
-            760.0
+            744.0
+          ]
+        },
+        {
+          "type": "key_value",
+          "text": "Due DateOctober152030",
+          "position": [
+            42.0,
+            758.0
           ]
         }
       ],
       "features": {
         "has_table": true,
-        "num_key_value_pairs": 26,
-        "text_density": 0.56,
-        "total_lines": 56
+        "num_key_value_pairs": 14,
+        "text_density": 0.51,
+        "total_lines": 51
       }
     },
     "classification": {
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 6.194216251373291
+    "detected_language": "en",
+    "processing_time": 11.39496111869812
   },
   {
     "filename": "sample3.jpeg",
-    "full_text_ocr": "SUPERMARKET\nLorem ipsum 258\nTel+45646898702\nCity Index02025\nCashier.\nMenager:\nEric Steer\n#3\nNamt\nOf\nPice\nLoremipsum\n$9.20\nLorem ipsum dolor sit\n1\n$19.20\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum\n1\n$15.00\nLorem ipsum dolorsit\n1\n$15.00\nLorem ipsum\n1\n$19.20\nSub Total\n$107.60\nHSYO\nCHANCE\n$200.00\n$92.40\nClad to see you again\nTHANK YOU!\nmodtal",
-    "ocr_confidence": 0.9028454942580981,
+    "full_text_ocr": "SUPERMARXET\n5bTo\n$107.60",
+    "ocr_confidence": 0.8017212152481079,
     "layout": {
       "title": null,
       "sections": [],
       "features": {
         "has_table": true,
         "num_key_value_pairs": 0,
-        "text_density": 0.39,
-        "total_lines": 39
+        "text_density": 0.03,
+        "total_lines": 3
       }
     },
     "classification": {
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 3.0732343196868896
+    "detected_language": "en",
+    "processing_time": 5.501670837402344
   },
   {
     "filename": "sample2.png",
-    "full_text_ocr": "SA\nMalaysia Invoice\nInvoice no.:\n100\nInvoice date:\nJul 13th, 2021\nDue:\nFeb 13th2021\nFrom\nBill to\nSaldo Apps\nShepard corp.\nJohn Smith\nshepard@mail.com\nwiz@saldoapps.com\n80296979597\n80296979597\nNorth str., 32, Chicago, USA\nsaldoapps.com\nFirst str.,2832, Chicago, USA\nShipto\nNorth str., 32, Chicago, USA\nTrack #:RO80296979597\nDESCRIPTION\nRATE, CADA\nQTY\nTAX\nDISC\nAMOUNT, CADA\nPrototype\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPrototype-based programming is a style\nof object-oriented programming\nDesign\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPayment instruction\nSubtotal:\nUSD8000.00\nPaypal email\nDiscount (20%):\nUSD 0.00\nwiz@saldoapps.com\nShipping Cost:\nUSD 0.00\nMake checks payable to\nSales Tax:\nUSD 450.00\nJohn Smith\nTotal:\nUSD8,480.00\nBank Transfer\nAmount paid:\nUSD 0.00\nRouting (ABA):061120084\nBalance Due:\nUSD8,480.00\nNotes\nPrototype-based programming is a style of\nobject-oriented programming in which behaviour",
-    "ocr_confidence": 0.9804501649159104,
+    "full_text_ocr": "Malaysia Invoice\nnca no\nLDO\no\n.202\n:ona\nfob32021\nFrom\nBill'tio,\nSaldo Apps\nShepard corp...\nJohin smlth.\nshopordmatcom\n80206970597\n80200079507\nhst32Chkgo.t$A\nsadoopps.com\nFusts28-32ChcogUSA\nShip.to\nhstr32Chkgo$A\nk#R080286970507\n./\n20,230,450.00\n2000\n120.50\n2050%\n20,230,450.00\n.fotypo-batepoganngty\ncotign\n2000,\n050\n20230450.00\nPaymontinstruction\nsubtotat:\nUSD6000.00\nPoypalomoi,\nDlscoun20x\nw@sokooppt.com\n:oo0asn\nMkochockspybol\nSaosta\ns0450.00\no$mth\nTotaE\nAnou pokt\nBankTranstor\nRoutgAB0n20084\nBolanco Duo\nUSD8,480.00\nNotos\nPrototypobasodprogromnngostyloo!\nobect-orientedpogrommang nwtchbchavou",
+    "ocr_confidence": 0.7929730644592872,
     "layout": {
       "title": "Malaysia Invoice",
       "sections": [
@@ -329,109 +220,38 @@
           "text": "Malaysia Invoice",
           "position": [
             344.0,
-            63.0
+            62.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Invoice no.:",
+          "text": "nca no",
           "position": [
             429.0,
-            124.0
+            122.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Invoice date:",
-          "position": [
-            429.0,
-            141.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "North str., 32, Chicago, USA",
-          "position": [
-            452.0,
-            266.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "North str., 32, Chicago, USA",
-          "position": [
-            452.0,
-            328.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Track #:RO80296979597",
-          "position": [
-            460.0,
-            342.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "AMOUNT, CADA",
-          "position": [
-            517.0,
-            408.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Discount (20%):",
-          "position": [
-            370.0,
-            564.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Shipping Cost:",
+          "text": "Anou pokt",
           "position": [
             369.0,
-            582.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Amount paid:",
-          "position": [
-            370.0,
-            644.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Routing (ABA):061120084",
-          "position": [
-            36.0,
-            664.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Balance Due:",
-          "position": [
-            369.0,
-            670.0
+            640.0
           ]
         }
       ],
       "features": {
         "has_table": true,
-        "num_key_value_pairs": 12,
-        "text_density": 0.67,
-        "total_lines": 67
+        "num_key_value_pairs": 3,
+        "text_density": 0.52,
+        "total_lines": 52
       }
     },
     "classification": {
       "doc_type": "unknown",
       "confidence": 0.0
     },
-    "processing_time": 5.991847991943359
+    "detected_language": "en",
+    "processing_time": 11.4028480052948
   }
 ]
