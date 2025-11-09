@@ -35,9 +35,22 @@ def process_single_document(image_path, ocr_vl, classifier=None):
     다국어 지원:
     - OCR 자동 언어 감지
     - 감지된 언어 정보를 분류기 및 LLM에 전달
+    
+    PDF 지원:
+    - PDF 파일 자동 감지
+    - 멀티페이지 처리 (N≤3: 전체, N>3: 첫 3페이지)
     """
-    # Step 1: OCR-VL (다국어 자동 감지)
-    ocr_result = ocr_vl.process_document(str(image_path), lang='auto')
+    # Step 1: PDF vs 이미지 구분
+    file_path = Path(image_path)
+    is_pdf = file_path.suffix.lower() == '.pdf'
+    
+    # Step 2: OCR 처리
+    if is_pdf:
+        # PDF 멀티페이지 처리
+        ocr_result = ocr_vl.process_pdf_multipage(str(image_path), lang='auto')
+    else:
+        # 일반 이미지 처리
+        ocr_result = ocr_vl.process_document(str(image_path), lang='auto')
     
     if 'error' in ocr_result:
         print(f"  ❌ OCR error: {ocr_result['error']}")
@@ -61,9 +74,14 @@ def process_single_document(image_path, ocr_vl, classifier=None):
         "ocr_confidence": ocr_result['confidence'],
         "layout": ocr_result['layout'],
         "classification": classification,
-        "detected_language": ocr_result.get('detected_language', 'en'),  # ✨ 추가!
+        "detected_language": ocr_result.get('detected_language', 'en'),
         "processing_time": ocr_result['processing_time']
     }
+    
+    # PDF 관련 정보 추가 (있으면)
+    if 'total_pages' in ocr_result:
+        result['total_pages'] = ocr_result['total_pages']
+        result['processed_pages'] = ocr_result['processed_pages']
     
     return result
 
@@ -142,6 +160,19 @@ def main():
         avg_time = sum(r['processing_time'] for r in results) / len(results)
         print(f"\nAverage OCR confidence: {avg_ocr_conf:.2%}")
         print(f"Average processing time: {avg_time:.2f}s")
+        
+        # PDF 통계
+        pdf_docs = [r for r in results if 'total_pages' in r]
+        if pdf_docs:
+            total_pdf_pages = sum(r['total_pages'] for r in pdf_docs)
+            processed_pdf_pages = sum(r['processed_pages'] for r in pdf_docs)
+            print(f"\nPDF Statistics:")
+            print(f"  PDF files: {len(pdf_docs)}")
+            print(f"  Total pages: {total_pdf_pages}")
+            print(f"  Processed pages: {processed_pdf_pages}")
+            if total_pdf_pages > processed_pdf_pages:
+                skipped = total_pdf_pages - processed_pdf_pages
+                print(f"  Skipped pages: {skipped} (strategy: first 3 pages only)")
         
         # 분류 통계 (분류 모델이 있으면)
         if classifier:

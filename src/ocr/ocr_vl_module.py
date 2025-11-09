@@ -384,6 +384,166 @@ class OCRVLModule:
         """평균 신뢰도 계산"""
         confidences = [line[1][1] for line in result[0]]
         return sum(confidences) / len(confidences) if confidences else 0.0
+    
+    def process_pdf_multipage(self, pdf_path, lang='auto', max_pages=3):
+        """
+        PDF 파일의 여러 페이지 처리
+        
+        전략:
+        - 총 페이지 수 N ≤ 3: 모든 페이지 처리
+        - 총 페이지 수 N > 3: 첫 3페이지만 처리
+        
+        Args:
+            pdf_path: PDF 파일 경로
+            lang: 언어 ('auto' 또는 'en', 'thai', 'korean', 'japan')
+            max_pages: 최대 처리 페이지 수 (기본 3)
+        
+        Returns:
+            dict: {
+                "full_text": str (모든 페이지 텍스트, "[Page N]"으로 구분),
+                "layout": dict (첫 페이지 레이아웃),
+                "confidence": float (평균 신뢰도),
+                "processing_time": float,
+                "detected_language": str,
+                "total_pages": int,
+                "processed_pages": int
+            }
+        """
+        import fitz  # PyMuPDF
+        import tempfile
+        import os
+        from pathlib import Path
+        
+        start_time = time.time()
+        
+        print(f"\n📄 Processing PDF: {Path(pdf_path).name}")
+        
+        try:
+            # PDF 열기
+            doc = fitz.open(pdf_path)
+            total_pages = len(doc)
+            
+            print(f"  📊 Total pages: {total_pages}")
+            
+            # 처리할 페이지 수 결정
+            if total_pages <= 3:
+                pages_to_process = total_pages
+                print(f"  ✅ Processing all {total_pages} pages")
+            else:
+                pages_to_process = max_pages
+                print(f"  📌 Processing first {max_pages} pages (out of {total_pages})")
+            
+            all_texts = []
+            all_confidences = []
+            first_page_layout = None
+            detected_lang = None
+            
+            # 임시 디렉토리 생성
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # 각 페이지를 순차적으로 처리
+                for page_num in range(pages_to_process):
+                    print(f"\n  📄 Processing page {page_num + 1}/{pages_to_process}...")
+                    
+                    try:
+                        # 페이지를 이미지로 변환
+                        page = doc[page_num]
+                        pix = page.get_pixmap()
+                        
+                        # 임시 이미지 파일로 저장
+                        temp_image = os.path.join(temp_dir, f"page_{page_num}.png")
+                        pix.save(temp_image)
+                        
+                        # OCR 처리
+                        result = self.process_document(temp_image, lang=lang)
+                        
+                        if 'error' not in result:
+                            # 페이지 번호와 함께 텍스트 저장
+                            page_text = f"[Page {page_num + 1}]\n{result['full_text']}"
+                            all_texts.append(page_text)
+                            all_confidences.append(result['confidence'])
+                            
+                            # 첫 페이지의 레이아웃과 언어 정보 저장
+                            if page_num == 0:
+                                first_page_layout = result['layout']
+                                detected_lang = result.get('detected_language', 'en')
+                            
+                            print(f"    ✓ Page {page_num + 1} done (confidence: {result['confidence']:.2%})")
+                        else:
+                            print(f"    ⚠️  Page {page_num + 1} OCR failed: {result['error']}")
+                            all_texts.append(f"[Page {page_num + 1}]\n[OCR Error: {result['error']}]")
+                            all_confidences.append(0.0)
+                        
+                        # 메모리 해제
+                        del pix
+                        del page
+                        
+                        # 임시 파일 즉시 삭제
+                        if os.path.exists(temp_image):
+                            os.remove(temp_image)
+                    
+                    except Exception as page_error:
+                        print(f"    ❌ Error processing page {page_num + 1}: {page_error}")
+                        all_texts.append(f"[Page {page_num + 1}]\n[Error: {str(page_error)}]")
+                        all_confidences.append(0.0)
+            
+            # 문서 닫기
+            doc.close()
+            
+            # 결과 조합
+            if not all_texts:
+                return {
+                    "full_text": "",
+                    "layout": {},
+                    "confidence": 0.0,
+                    "processing_time": time.time() - start_time,
+                    "detected_language": 'en',
+                    "total_pages": total_pages,
+                    "processed_pages": 0,
+                    "error": "No pages could be processed"
+                }
+            
+            combined_text = "\n\n".join(all_texts)
+            avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
+            
+            print(f"\n  ✅ PDF processing complete!")
+            print(f"     Processed: {len(all_texts)}/{total_pages} pages")
+            print(f"     Average confidence: {avg_confidence:.2%}")
+            print(f"     Total time: {time.time() - start_time:.2f}s")
+            
+            return {
+                "full_text": combined_text,
+                "layout": first_page_layout or {},
+                "confidence": avg_confidence,
+                "processing_time": time.time() - start_time,
+                "detected_language": detected_lang or 'en',
+                "total_pages": total_pages,
+                "processed_pages": len(all_texts)
+            }
+        
+        except Exception as e:
+            error_msg = str(e)
+            print(f"\n  ❌ PDF processing failed: {error_msg}")
+            
+            # 에러 타입별 메시지
+            if "password" in error_msg.lower() or "encrypted" in error_msg.lower():
+                error_type = "Encrypted PDF - password required"
+            elif "damaged" in error_msg.lower() or "corrupt" in error_msg.lower():
+                error_type = "Corrupted or damaged PDF file"
+            elif "not a pdf" in error_msg.lower():
+                error_type = "Invalid PDF format"
+            else:
+                error_type = f"PDF processing error: {error_msg}"
+            
+            return {
+                "full_text": "",
+                "layout": {},
+                "confidence": 0.0,
+                "processing_time": time.time() - start_time,
+                "detected_language": 'en',
+                "total_pages": 0,
+                "processed_pages": 0,
+                "error": error_type
+            }
 
 if __name__ == "__main__":
     # 빠른 단일 파일 테스트용
