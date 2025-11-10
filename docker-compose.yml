@@ -1,4 +1,5 @@
-# D:\42_asia-hackathon\docker-compose.yml (최종 "Full GPU" 전략)
+# [수정 후: docker-compose.yml]
+# (원본 'ver2'의 Full GPU 전략 파일 기준)
 
 services:
   app:
@@ -7,8 +8,9 @@ services:
       - "8001:8000"
     volumes:
       - ./models:/usr/src/models
-      # 🔴 [수정] 파일 업로드를 위한 공유 볼륨
-      - uploads_data:/tmp/doc_uploads
+      # 🔴 [수정] main.py의 새 경로(/uploads_data/input)와 맞춤
+      # (기존: - uploads_data:/tmp/doc_uploads)
+      - uploads_data:/uploads_data
     env_file:
       - .env
     environment:
@@ -30,8 +32,9 @@ services:
     command: celery -A app.worker.celery_app worker --loglevel=info
     volumes:
       - ./models:/usr/src/models
-      # 🔴 [수정] app과 동일한 공유 볼륨 (파일 읽기용)
-      - uploads_data:/tmp/doc_uploads
+      # 🔴 [수정] main.py의 새 경로(/uploads_data/input)와 맞춤
+      # (기존: - uploads_data:/tmp/doc_uploads)
+      - uploads_data:/uploads_data
     env_file:
       - .env
     environment:
@@ -42,13 +45,13 @@ services:
       - meilisearch
       - llm-server
     restart: on-failure
-    # 🔴 [!!! Mac 테스트용 수정 !!!] NVIDIA GPU 할당 옵션 주석 처리
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           capabilities: [gpu]
+    # 🔴 [Full GPU 전략 1] Celery-worker에 GPU 할당 (유지)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
 
   redis:
     image: redis:7-alpine
@@ -82,7 +85,7 @@ services:
       context: ./shimmy-source
       dockerfile: Dockerfile
 
-    # 🔴 [Full GPU 전략 2] llm-server에 GPU를 사용하도록 명령어 수정
+    # 🔴 [Full GPU 전략 2] llm-server에 GPU 사용 (유지)
     command:
       - "shimmy"
       - "serve"
@@ -90,14 +93,11 @@ services:
       - "0.0.0.0:11435"
       - "--model-path"
       - "/models/Qwen2.5-7b-Chat-Q4_K_M.gguf"
-      - "--n-cpu-moe"
-      - "1"
-      # - "/models/google_gemma-3-4b-it-Q4_K_M.gguf"
 
     ports:
       - "11435:11435"
     volumes:
-      # 🔴 [필수] 로컬 모델 마운트
+      # 🔴 [필수] 로컬 모델 마운트 (유지)
       - ./models:/models
     restart: always
 
@@ -105,5 +105,5 @@ volumes:
   redis_data:
   qdrant_data:
   meili_data:
-  # 🔴 [수정] 공유 볼륨 정의
+  # 🔴 [수정] 공유 볼륨 정의 (이름은 'uploads_data'로 동일)
   uploads_data:

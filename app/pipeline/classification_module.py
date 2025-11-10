@@ -1,3 +1,4 @@
+# [수정 후: app/pipeline/classification_module.py]
 import os
 from app.config import settings
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizerFast
@@ -10,13 +11,11 @@ logger = logging.getLogger(__name__)
 
 class DocumentClassifier:
     def __init__(self):
-        # 1. 모델 경로 설정 (docker-compose.yml의 볼륨과 일치)
-        # 우리는 'classifier'라는 이름의 폴더를 마운트할 것입니다.
+        # 1. 모델 경로 설정
         MODEL_PATH = settings.MODEL_PATH
 
-        # 2. 장치 설정: Docker 컨테이너 내에서는 CPU가 가장 안정적입니다.
-        # (ocr_module.py가 use_gpu=False로 설정한 것과 같은 원리)
-        self.device = "cpu"
+        # 2. 🟢 [GPU 수정] A100 GPU(cuda)를 사용할 수 있으면 자동으로 감지
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         logger.info(f"분류 모델 로딩 시작. 경로: {MODEL_PATH}, 장치: {self.device}")
 
@@ -25,7 +24,7 @@ class DocumentClassifier:
             self.model = DistilBertForSequenceClassification.from_pretrained(MODEL_PATH).to(self.device)
             self.tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_PATH)
 
-            # 4. 분류 클래스 이름(라벨) 로드 (예: 'invoice', 'report'...)
+            # 4. 분류 클래스 이름(라벨) 로드
             self.id2label = self.model.config.id2label
             self.class_names = list(self.id2label.values())
 
@@ -52,7 +51,7 @@ class DocumentClassifier:
                 truncation=True,
                 padding=True,
                 max_length=512
-            ).to(self.device)
+            ).to(self.device) # 🟢 [GPU 수정] 토치 텐서를 A100 GPU 메모리로 보냄
 
             # 2. 모델 예측
             with torch.no_grad():
