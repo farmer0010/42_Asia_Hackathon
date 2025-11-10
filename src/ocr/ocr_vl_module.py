@@ -322,14 +322,30 @@ class OCRVLModule:
         - 제목 식별
         - 키-값 쌍 감지
         - 테이블 감지
+        - 모든 텍스트 박스 정보 (all_boxes)
         """
         lines = result[0]
         
         layout = {
             "title": None,
             "sections": [],
+            "all_boxes": [],  # 새로 추가: 모든 텍스트+위치+신뢰도
             "features": {}
         }
+        
+        # 0. 모든 텍스트 박스 저장 (필터링 없이 전부)
+        for line in lines:
+            bbox, (text, conf) = line
+            x1, y1 = bbox[0]  # 좌상단
+            x2, y2 = bbox[2]  # 우하단
+            
+            layout["all_boxes"].append({
+                "text": text,
+                "bbox": [float(x1), float(y1), float(x2), float(y2)],  # [left, top, right, bottom]
+                "confidence": float(conf),
+                "width": float(x2 - x1),
+                "height": float(y2 - y1)
+            })
         
         # 1. 제목 찾기 (Y < 100, W > 150, H > 15)
         for line in lines:

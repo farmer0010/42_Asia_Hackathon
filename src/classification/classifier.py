@@ -41,7 +41,7 @@ class DocumentClassifier:
         self.model_class = XLMRobertaForSequenceClassification
         
         # 문서 타입 정의
-        self.labels = ['invoice', 'receipt', 'resume', 'report', 'contract']
+        self.labels = ['invoice', 'purchase_order', 'resume', 'passport', 'custom_form']
         self.label_to_id = {label: i for i, label in enumerate(self.labels)}
         self.id_to_label = {i: label for i, label in enumerate(self.labels)}
         self.model = None
