@@ -46,8 +46,8 @@ RUN pip install --no-cache-dir -r requirements.txt && \
     # 🔴 1. 충돌 가능성이 있는 모든 라이브러리를 강제 삭제
     pip uninstall -y paddlepaddle paddlepaddle-gpu paddleocr paddlex numpy opencv-python opencv-python-headless scipy scikit-learn && \
 
-    # 🔴 2. "황금 버전" 1: Paddle + Numpy (Mac CPU 버전 및 2.6.1로 수정)
-    pip install paddlepaddle==2.6.1 && \
+    # 🔴 2. "황금 버전" 1: Paddle (A100 GPU 버전) + Numpy
+    pip install paddlepaddle-gpu==2.5.2 && \
     pip install paddleocr==2.7.0.3 && \
     pip install numpy==1.24.4 && \
     pip install opencv-python-headless==4.8.1.78 && \

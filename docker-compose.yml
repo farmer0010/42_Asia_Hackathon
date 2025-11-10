@@ -84,8 +84,6 @@ services:
     build:
       context: ./shimmy-source
       dockerfile: Dockerfile
-
-    # 🔴 [Full GPU 전략 2] llm-server에 GPU 사용 (유지)
     command:
       - "shimmy"
       - "serve"
@@ -93,13 +91,18 @@ services:
       - "0.0.0.0:11435"
       - "--model-path"
       - "/models/Qwen2.5-7b-Chat-Q4_K_M.gguf"
-
     ports:
       - "11435:11435"
     volumes:
-      # 🔴 [필수] 로컬 모델 마운트 (유지)
       - ./models:/models
     restart: always
+    # 🔴 [Full GPU 전략 2] llm-server에 GPU 할당 (누락된 부분)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
 
 volumes:
   redis_data:
