@@ -1,38 +1,42 @@
-import os
+# src/llm/config.py
 from pathlib import Path
 import json
 
-# 외부 환경변수로 경로 오버라이드 가능
-PROMPTS_DIR = Path(os.environ.get("LLM_PROMPTS_DIR", "src/llm/prompts")).resolve()
-SCHEMAS_DIR = Path(os.environ.get("LLM_SCHEMAS_DIR", "src/llm/schemas")).resolve()
+def read_prompt(path: str | Path) -> str:
+    """프롬프트 파일을 UTF-8로 읽어 문자열 반환"""
+    return Path(path).read_text(encoding="utf-8")
 
-PROMPT_FILES = {
-    "classify": "classify.txt",
-    "extract_invoice": "extract_invoice.txt",
-    "extract_receipt": "extract_receipt.txt",
-    "extract_report": "extract_report.txt",
-    "extract_resume": "extract_resume.txt",
-    "extract_contract": "extract_contract.txt",
-    "pii": "pii.txt",
-    "summarize": "summarize.txt",
+def load_schema(path: str | Path) -> dict:
+    """JSON 스키마 파일을 로드해 dict로 반환"""
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+BASE = Path(__file__).resolve().parent
+PROMPTS_DIR = BASE / "prompts"
+SCHEMAS_DIR = BASE / "schemas"
+
+DEFAULT_MODEL = "qwen2.5:7b"
+DEFAULT_RETRIES = 2
+JSON_MAX_TOKENS = 500
+
+DOC_CONFIG = {
+    "passport": {
+        "schema": SCHEMAS_DIR / "passport_v1.json",
+        "prompt": PROMPTS_DIR / "extract_passport.txt",
+    },
+    "resume": {
+        "schema": SCHEMAS_DIR / "resume_v1.json",
+        "prompt": PROMPTS_DIR / "extract_resume.txt",
+    },
+    "invoice": {
+        "schema": SCHEMAS_DIR / "invoice_v1.json",
+        "prompt": PROMPTS_DIR / "extract_invoice.txt",
+    },
+    "purchase_order": {
+        "schema": SCHEMAS_DIR / "purchase_order_v1.json",
+        "prompt": PROMPTS_DIR / "extract_purchase_order.txt",
+    },
+    "custom_form": {
+        "schema": SCHEMAS_DIR / "custom_form_v1.json",
+        "prompt": PROMPTS_DIR / "extract_custom_form.txt",
+    },
 }
-
-SCHEMA_FILES = {
-    "invoice": "invoice_v1.json",
-    "receipt": "receipt_v1.json",
-    "report": "report_v1.json",
-    "resume": "resume_v1.json",
-    "contract": "contract_v1.json",
-}
-
-def prompt_path(key: str) -> Path:
-    return PROMPTS_DIR / PROMPT_FILES[key]
-
-def schema_path(key: str) -> Path:
-    return SCHEMAS_DIR / SCHEMA_FILES[key]
-
-def read_prompt(key: str) -> str:
-    return prompt_path(key).read_text(encoding="utf-8")
-
-def load_schema(key: str) -> dict:
-    return json.loads(schema_path(key).read_text(encoding="utf-8"))

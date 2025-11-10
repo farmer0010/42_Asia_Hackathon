@@ -1,0 +1,18 @@
+{
+  "title": "passport_v1",
+  "type": "object",
+  "properties": {
+    "passport_number": { "type": "string" },
+    "surname": { "type": "string" },
+    "given_names": { "type": "string" },
+    "nationality_code": { "type": "string" },
+    "nationality_long": { "type": "string" },
+    "sex": { "type": "string" },
+    "date_of_birth": { "type": "string" },
+    "date_of_issue": { "type": "string" },
+    "date_of_expiry": { "type": "string" },
+    "mrz_line1": { "type": "string" },
+    "mrz_line2": { "type": "string" }
+  },
+  "required": ["passport_number", "mrz_line2"]
+}

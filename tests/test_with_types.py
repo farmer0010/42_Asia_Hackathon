@@ -51,31 +51,43 @@ def auto_assign_type(filename, text):
         return 'report'
     elif 'contract' in filename_lower:
         return 'contract'
+    elif 'purchase' in filename_lower and 'order' in filename_lower:
+        return 'purchase_order'
+    elif 'custom' in filename_lower:
+        return 'custom_form'
     
-    # 텍스트 내용 기반 (간단한 휴리스틱)
-    if 'invoice' in text_lower and 'total' in text_lower:
+    # 텍스트 내용 기반 (간단 휴리스틱)
+    # 1) Passport: MRZ 패턴 또는 키워드
+    if 'passport' in text_lower or 'p<' in text_lower:
+        return 'passport'
+
+    # 2) Invoice
+    if 'invoice' in text_lower and ('total' in text_lower or 'subtotal' in text_lower):
         return 'invoice'
-    elif 'receipt' in text_lower:
-        return 'receipt'
-    elif 'experience' in text_lower or 'education' in text_lower:
+
+    # 3) Purchase Order
+    if 'purchase order' in text_lower or ('po ' in text_lower) or ('po-' in text_lower) or 'po number' in text_lower:
+        return 'purchase_order'
+
+    # 4) Resume
+    if any(k in text_lower for k in ['experience', 'work history', 'education', 'skills']) and 'invoice' not in text_lower:
         return 'resume'
-    elif 'summary' in text_lower or 'conclusion' in text_lower:
-        return 'report'
-    elif 'agreement' in text_lower or 'party' in text_lower:
-        return 'contract'
+
+    # 5) Customs Form
+    if any(k in text_lower for k in ['customs', 'declaration', 'nothing to declare', 'passenger declaration']):
+        return 'custom_form'
     
     # 기본값 (다양하게 테스트하기 위해 순환 할당)
-    defaults = ['invoice', 'receipt', 'resume', 'report', 'contract']
+    defaults = ['passport', 'invoice', 'resume', 'custom_form', 'purchase_order']
     return defaults[hash(filename) % len(defaults)]
 
 # 수동 매핑 (우선순위 높음)
 manual_mapping = {
-    'sample4.jpg': 'receipt',
-    'sample1.jpg': 'invoice',
-    'invoice1.jpg': 'report',
-    'sample3.jpeg': 'receipt',
-    'testtest.png': 'contract',
-    'sample2.png': 'receipt'
+    # filename -> doc_type
+    "sample1.png": "passport",
+    # "sample2.png": "invoice",
+    # "sample3.jpeg": "receipt",
+    # "sample4.jpg": "receipt",
 }
 
 for pred in predictions:
@@ -90,8 +102,15 @@ for pred in predictions:
         doc_type = auto_assign_type(filename, text)
         print(f"   ✓ {filename} → {doc_type} (auto)")
     
+    if 'classification' not in pred or not isinstance(pred['classification'], dict):
+        pred['classification'] = {}
     pred['classification']['doc_type'] = doc_type
     pred['classification']['confidence'] = 0.95
+
+# 타입 카운트 프리뷰
+from collections import Counter
+counts = Counter(p['classification']['doc_type'] for p in predictions if p.get('classification'))
+print("   Type counts (pre-save):", dict(counts))
 
 # 4. 저장
 output_path = 'data/output/predictions_with_types.json'

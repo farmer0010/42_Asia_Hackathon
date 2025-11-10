@@ -49,18 +49,18 @@ OCR/분류 파이프라인에서 LLM 팀에 전달하는 JSON 구조입니다.
 
 ### 필드 설명
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `filename` | string | 원본 파일명 |
-| `full_text_ocr` | string | OCR 추출 텍스트 (줄바꿈 포함) |
-| `ocr_confidence` | float | OCR 평균 신뢰도 (0~1) |
-| `layout.title` | string | 문서 제목 (상단 큰 글씨) |
-| `layout.sections` | array | 키-값 쌍 (필터링됨) |
-| `layout.all_boxes` | array | **[신규]** 모든 텍스트+위치 |
-| `layout.features` | object | 문서 특징 (테이블 유무 등) |
-| `classification.doc_type` | string | 문서 타입 (5가지) |
-| `classification.confidence` | float | 분류 신뢰도 (0~1) |
-| `detected_language` | string | 감지된 언어 (en/thai/korean/japan) |
+| 필드                        | 타입   | 설명                               |
+| --------------------------- | ------ | ---------------------------------- |
+| `filename`                  | string | 원본 파일명                        |
+| `full_text_ocr`             | string | OCR 추출 텍스트 (줄바꿈 포함)      |
+| `ocr_confidence`            | float  | OCR 평균 신뢰도 (0~1)              |
+| `layout.title`              | string | 문서 제목 (상단 큰 글씨)           |
+| `layout.sections`           | array  | 키-값 쌍 (필터링됨)                |
+| `layout.all_boxes`          | array  | **[신규]** 모든 텍스트+위치        |
+| `layout.features`           | object | 문서 특징 (테이블 유무 등)         |
+| `classification.doc_type`   | string | 문서 타입 (5가지)                  |
+| `classification.confidence` | float  | 분류 신뢰도 (0~1)                  |
+| `detected_language`         | string | 감지된 언어 (en/thai/korean/japan) |
 
 ---
 
@@ -163,7 +163,7 @@ footer = [b for b in all_boxes if b["bbox"][1] >= 600]
 ✅ **정확한 관계 파악**: 키 옆에 있는 값 자동 매칭  
 ✅ **테이블 구조 복원**: 행/열 순서 정확하게 파악  
 ✅ **섹션 분리**: 위치 기반 논리적 그룹핑  
-✅ **겹침 처리**: bbox로 겹친 텍스트 구분 가능  
+✅ **겹침 처리**: bbox로 겹친 텍스트 구분 가능
 
 ---
 
@@ -207,6 +207,7 @@ footer = [b for b in all_boxes if b["bbox"][1] >= 600]
 ```
 
 **해결 방법:**
+
 ```python
 # 1. MRZ에서 확인 (가장 정확)
 # mrz_line2[8:14] = "880409" → 1988-04-09
@@ -237,7 +238,7 @@ Line 2: PPPPPPPPPNCCCYYMMDDDSYYMMDDDBBBBBBBBBBBCC
 #### 프롬프트 힌트
 
 ```
-⚠️ IMPORTANT: 
+⚠️ IMPORTANT:
 - nationality_long may visually overlap with date_of_birth
 - Use MRZ (line starting with "P<") for accurate date extraction
 - MRZ format: Line2[13:19] = YYMMDD for birth date
@@ -283,11 +284,11 @@ Line 2: PPPPPPPPPNCCCYYMMDDDSYYMMDDDBBBBBBBBBBBCC
 
 **1. 템플릿 3가지**
 
-| 템플릿 | 레이아웃 | 특징 |
-|--------|---------|------|
+| 템플릿  | 레이아웃                  | 특징                   |
+| ------- | ------------------------- | ---------------------- |
 | sidebar | 좌측 사이드바 + 우측 본문 | Y좌표 순서 ≠ 읽기 순서 |
-| classic | 단일 컬럼 | 위→아래 순서 |
-| modern | 2컬럼 | 좌우 섹션 혼합 |
+| classic | 단일 컬럼                 | 위→아래 순서           |
+| modern  | 2컬럼                     | 좌우 섹션 혼합         |
 
 **2. 섹션 헤더 키워드**
 
@@ -456,11 +457,11 @@ Validation:
 
 **1. 3가지 형식 변형**
 
-| 형식 | 제목 위치 | PO 정보 위치 | 특징 |
-|------|----------|------------|------|
-| 형식 1 | 좌상단 | 우상단 (텍스트) | 가장 일반적 |
-| 형식 2 | 중앙 | 표 형태 | PO/PR/Date가 표로 정리 |
-| 형식 3 | 혼합 | 혼합 | 일부는 표, 일부는 텍스트 |
+| 형식   | 제목 위치 | PO 정보 위치    | 특징                     |
+| ------ | --------- | --------------- | ------------------------ |
+| 형식 1 | 좌상단    | 우상단 (텍스트) | 가장 일반적              |
+| 형식 2 | 중앙      | 표 형태         | PO/PR/Date가 표로 정리   |
+| 형식 3 | 혼합      | 혼합            | 일부는 표, 일부는 텍스트 |
 
 **형식 감지 방법:**
 
@@ -510,13 +511,13 @@ right_section = [b for b in all_boxes if b["bbox"][0] >= 400]  # Vendor
 
 **4. Invoice와 구분 (중요!)**
 
-| 필드 | Purchase Order | Invoice |
-|------|---------------|---------|
-| 제목 | "Purchase Order" | "Invoice" |
-| 번호 | "PO Number" | "Invoice Number" |
-| 날짜 | "Delivery Date" | "Due Date" |
-| 상대방 | Buyer/Vendor | Customer |
-| 서명 | Approver | 보통 없음 |
+| 필드   | Purchase Order   | Invoice          |
+| ------ | ---------------- | ---------------- |
+| 제목   | "Purchase Order" | "Invoice"        |
+| 번호   | "PO Number"      | "Invoice Number" |
+| 날짜   | "Delivery Date"  | "Due Date"       |
+| 상대방 | Buyer/Vendor     | Customer         |
+| 서명   | Approver         | 보통 없음        |
 
 #### 프롬프트 힌트
 
@@ -596,6 +597,7 @@ Key differences from Invoice:
 **1. 체크박스 처리 (핵심!)**
 
 OCR 결과:
+
 ```
 "☑ Nothing to Declare"
 "☐ Articles to Declare"
@@ -608,6 +610,7 @@ OCR 결과:
 ```
 
 **체크 감지 패턴:**
+
 ```python
 checked_patterns = [
     "☑", "[X]", "[x]", "✓", "✔",
@@ -650,7 +653,7 @@ Checkbox detection:
 - Look for patterns: ☑, [X], [x], ✓, ✔, (checked)
 - Status fields:
   * hasArticlesToDeclare
-  * hasExcessCurrency  
+  * hasExcessCurrency
   * hasNothingToDeclare
 
 Bottom section:
@@ -673,14 +676,14 @@ declaredItems array:
 def process_document(prediction):
     # 1. 문서 타입 확인
     doc_type = prediction["classification"]["doc_type"]
-    
+
     # 2. 품질 확인
     if prediction["ocr_confidence"] < 0.7:
         logger.warning(f"Low OCR confidence: {prediction['ocr_confidence']}")
-    
+
     # 3. all_boxes 활용
     all_boxes = prediction["layout"]["all_boxes"]
-    
+
     # 4. 타입별 처리
     if doc_type == "passport":
         return extract_passport(prediction, all_boxes)
@@ -744,19 +747,19 @@ def filter_by_region(boxes, x_min=None, x_max=None, y_min=None, y_max=None):
 def check_quality(prediction):
     """데이터 품질 확인"""
     issues = []
-    
+
     # OCR 신뢰도
     if prediction["ocr_confidence"] < 0.7:
         issues.append("Low OCR confidence")
-    
+
     # 분류 신뢰도
     if prediction["classification"]["confidence"] < 0.6:
         issues.append("Low classification confidence")
-    
+
     # all_boxes 개수
     if len(prediction["layout"]["all_boxes"]) < 10:
         issues.append("Too few text boxes detected")
-    
+
     return issues
 ```
 
@@ -769,12 +772,14 @@ def check_quality(prediction):
 **증상**: `ocr_confidence` < 0.7
 
 **원인**:
+
 - 저해상도 이미지
 - 워터마크 (예: Passport의 "SPECIMEN")
 - 손글씨
 - 복잡한 배경
 
 **대응 방법**:
+
 ```python
 if ocr_confidence < 0.7:
     # 1. 더 관대한 파싱 로직 사용
@@ -788,10 +793,12 @@ if ocr_confidence < 0.7:
 **증상**: `classification.doc_type`이 잘못됨
 
 **흔한 케이스**:
+
 - Invoice ↔ Purchase Order 혼동
   - 해결: 키워드 확인 ("Customer" vs "Buyer/Vendor")
 
 **대응 방법**:
+
 ```python
 # 키워드 기반 검증
 full_text = prediction["full_text_ocr"].lower()
@@ -806,10 +813,12 @@ if doc_type == "invoice" and "buyer" in full_text and "vendor" in full_text:
 **증상**: line_items가 잘못 추출됨
 
 **원인**:
+
 - 테이블 행이 Y좌표로 제대로 그룹핑 안됨
 - 열 구분이 애매함
 
 **대응 방법**:
+
 ```python
 # tolerance 조정
 rows = group_by_y(table_boxes, tolerance=10)  # 5 → 10으로 증가
@@ -829,10 +838,12 @@ for data_row in rows[1:]:
 **증상**: hasNothingToDeclare 등이 항상 false
 
 **원인**:
+
 - OCR이 체크 기호를 인식 못함
 - 체크 패턴이 예상과 다름
 
 **대응 방법**:
+
 ```python
 # 더 많은 패턴 추가
 checked_patterns = [
@@ -850,6 +861,7 @@ checked_patterns = [
 **증상**: nationality_long과 date_of_birth가 합쳐짐
 
 **대응 방법**:
+
 ```python
 # MRZ 우선 사용
 if "mrz_line2" in extracted_data:
@@ -866,11 +878,13 @@ else:
 ## 6. 연락처
 
 **OCR/분류 팀**:
+
 - 질문/이슈: 팀 채팅방 또는 이슈 트래커
 - 데이터 문제: OCR 재처리 요청 가능
 - 새로운 요구사항: 언제든지 협의 가능
 
 **참고 문서**:
+
 - `QUICKTEST.md`: OCR/분류 파이프라인 테스트 방법
 - `COMPLETE_GUIDE.md`: 전체 시스템 가이드
 - `MULTILINGUAL_GUIDE.md`: 다국어 처리 가이드
@@ -880,5 +894,5 @@ else:
 **문서 버전**: 1.0  
 **마지막 업데이트**: 2025-11-10  
 **변경 이력**:
-- 2025-11-10: 초안 작성 (all_boxes 추가, 5개 문서 타입 정리)
 
+- 2025-11-10: 초안 작성 (all_boxes 추가, 5개 문서 타입 정리)

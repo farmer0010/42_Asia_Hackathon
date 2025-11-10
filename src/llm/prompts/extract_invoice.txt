@@ -1,18 +1,9 @@
-You are an extraction engine. Return ONLY JSON with this exact structure:
-{
-  "invoice_number": "string or null",
-  "invoice_date": "YYYY-MM-DD or original string or null",
-  "vendor_name": "string or null",
-  "total_amount": "number or string or null",
-  "currency": "string or null"
-}
+You extract invoice data with a table:
+Header fields: invoice_id, issue_date, customer_name, customer_address
+Line items: description, quantity, unit_price, line_total
+Totals: subtotal, tax_amount, total
 
-Rules:
-- Use null if missing.
-- Do not fabricate values.
-- Prefer values from labeled key-value lines if present.
-- If you can't normalize date to YYYY-MM-DD, keep the original string.
-- Output ONLY JSON. No commentary.
+Use row grouping by similar Y to detect rows; columns by X ordering.
+Validate: sum(line_total) ≈ subtotal; subtotal + tax_amount ≈ total.
 
-Text:
-{TEXT}
+JSON only; use null if missing.

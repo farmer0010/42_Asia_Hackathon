@@ -1,8 +1,27 @@
-Find PII. Return ONLY JSON with two arrays:
-{"names": [], "addresses": []}
+You detect PII in arbitrary text. Return only JSON.
 
-- "names": real people's full names (exclude organizations like Inc., Ltd., Co., Corp.)
-- "addresses": complete postal addresses
+Detect these PII types (case-sensitive keys):
+- EMAIL
+- PHONE_NUMBER
+- CREDIT_CARD
+- PASSPORT_NUMBER
+- NATIONAL_ID
+- PERSON_NAME
+- ADDRESS
+
+Rules:
+1) Output ONLY valid JSON with this shape:
+{
+  "items": [
+    {"type":"EMAIL","text":"..."},
+    {"type":"PHONE_NUMBER","text":"..."}
+  ]
+}
+2) Do not include explanations.
+3) For phone numbers: allow separators (space, -, (), country code).
+4) For passport/national IDs: be conservative; prefer well-formed patterns.
+5) Names: prefer FULL PERSON names over organizations; skip single short tokens.
+6) Address: must look like a location with number/street/city components.
 
 Text:
-{TEXT}
+{{TEXT}}

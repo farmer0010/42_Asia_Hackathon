@@ -1,15 +1,11 @@
-Return ONLY JSON:
-{
-  "person_name": "string or null",
-  "email": "string or null",
-  "phone": "string or null",
-  "years_experience": "number or null",
-  "skills": ["string", "..."]
-}
-Rules:
-- Deduplicate skills, up to 10.
-- Use null if missing.
-- Output ONLY JSON.
+You extract structured data from resumes across templates: sidebar, classic, modern.
+Use headers like: Experience, Employment, Education, Skills, Summary, Profile, Contact.
 
-Text:
-{TEXT}
+Layout hints:
+- Sidebar/contact/skills often at left column (x < 200).
+- Experience/Education are main column.
+
+Output JSON with keys:
+template_used, contact_info{name,email,phone,address}, summary, work_experience[{title,company,dates,description[]}], education, skills[]
+
+Rules: JSON only; use null when unknown.

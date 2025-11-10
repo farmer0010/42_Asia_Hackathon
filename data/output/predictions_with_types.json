@@ -1,417 +1,338 @@
 [
   {
-    "filename": "sample4.jpg",
-    "full_text_ocr": "Receipt\nAdress:1234 Lorem IpsumDolor\nTe1:123-456-7890\nDate:01-01-2018\n10:35\nLorem\n6.50\nIpsum\n7.50\nDolor Sit\n48.00\nAmet\n9.30\nConsectetur\n11.90\nAdipiscing Elit\n1.20\nSed Do\n0.40\nAMOUNT\n84.80\nSub-total\n76.80\nSales Tax\n8.00\nBalance\n84.80",
-    "ocr_confidence": 0.9861886192251135,
+    "filename": "sample1.png",
+    "full_text_ocr": "REPUBLIC OF HACKATHON\nPASSPORT/PASSEPORT\n1.Surname/Nom\n2.Given Names/Prenoms\nTREVINO\nJULIE\nS\n3.Nationality /Nationalite\n1. Date of Birth\nUNITED STATES MINOR OUTLYING IS1ANDS/ 1967\n5.Sex/Sexe\n6.Date of Issue\n7. Date of Expiry\nF\n12 MAY 2002\n15 APR 2012\n8.Passport No\n156343302\nP<GBRTREVINO<<JULIE<<<<\n1563433027GBR6711148E1204159<<<",
+    "ocr_confidence": 0.9723210364580155,
     "layout": {
-      "title": "Receipt",
+      "title": "REPUBLIC OF HACKATHON",
       "sections": [
         {
           "type": "key_value",
-          "text": "Adress:1234 Lorem IpsumDolor",
+          "text": "1.Surname/Nom",
           "position": [
-            226.0,
-            127.0
+            251.0,
+            122.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Te1:123-456-7890",
+          "text": "2.Given Names/Prenoms",
           "position": [
-            227.0,
-            158.0
+            649.0,
+            122.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Date:01-01-2018",
+          "text": "TREVINO",
           "position": [
-            227.0,
-            206.0
+            250.0,
+            148.0
           ]
         },
         {
           "type": "key_value",
-          "text": "10:35",
+          "text": "1. Date of Birth",
           "position": [
-            500.0,
-            204.0
+            655.0,
+            201.0
           ]
         },
         {
           "type": "key_value",
-          "text": "AMOUNT",
+          "text": "UNITED STATES MINOR OUTLYING IS1ANDS/ 1967",
           "position": [
-            219.0,
-            508.0
+            246.0,
+            224.0
           ]
         },
         {
           "type": "key_value",
-          "text": "Sub-total",
-          "position": [
-            217.0,
-            558.0
-          ]
-        }
-      ],
-      "features": {
-        "has_table": true,
-        "num_key_value_pairs": 6,
-        "text_density": 0.27,
-        "total_lines": 27
-      }
-    },
-    "classification": {
-      "doc_type": "receipt",
-      "confidence": 0.95
-    },
-    "detected_language": "en",
-    "processing_time": 5.023810863494873
-  },
-  {
-    "filename": "sample1.jpg",
-    "full_text_ocr": "Commercial Invoice\nInvoice Number:\nCI2023-001\nInvoice Date:\nSeptember 30.2030\nExporter Information\nImporter Information\nCompany Name:ABC Exports Ltd.\nConsignee Name:XYZ Importers Inc.\nCompany Address:123 Exporter Street, Export City\nConsignee Address:456 Importer Street, Import City\nPhone Number:(123)456-7890\nDestination Country: Important\nEmail: info@abcexports.com\nCustoms Declaration Number:CDN-2023-001\nItem Details:\nNo\nDescription of Goods\nQuantity\nUnit Price\nTotal\n1\nWidget Model X\n500\n$10.00\n$5,000.00\n2\nGadget Model Y\n300\n$15.00\n$4,500.00\nGizmo Model Z\n200\n$20.00\n$4,000.00\nCurrency:USD\nSub Total:\n$13,500.00\nExchange Rate:1.00\nTax:\n$1,000.00\nTotal Amount Due (In USD):S13,000.00\nShipping Charges:\n$500.00\nTotal:\n$13,000.00\nPayment Method:\nPayment Method:Wire Transfer\nBankAccount Number:1234-5678-9012-3456\nPayee Name:ABC Exports Ltd.\nDate : September 30, 2030\nAdditional Notes:\nExporter Notes:Please handle with care during shipping.\nShipping Date:September 30,2030 Payment\nDue Date:October 15,2030\nXYZ Importers Inc.",
-    "ocr_confidence": 0.9727200791239738,
-    "layout": {
-      "title": "Commercial Invoice",
-      "sections": [
-        {
-          "type": "key_value",
-          "text": "Commercial Invoice",
-          "position": [
-            47.0,
-            63.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Invoice Number:",
-          "position": [
-            391.0,
-            75.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Invoice Date:",
-          "position": [
-            391.0,
-            91.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Company Name:ABC Exports Ltd.",
-          "position": [
-            43.0,
-            184.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Consignee Name:XYZ Importers Inc.",
-          "position": [
-            341.0,
-            183.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Company Address:123 Exporter Street, Export City",
-          "position": [
-            43.0,
-            200.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Consignee Address:456 Importer Street, Import City",
-          "position": [
-            340.0,
-            200.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Phone Number:(123)456-7890",
-          "position": [
-            43.0,
-            215.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Destination Country: Important",
-          "position": [
-            340.0,
-            214.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Email: info@abcexports.com",
-          "position": [
-            42.0,
-            230.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Customs Declaration Number:CDN-2023-001",
-          "position": [
-            43.0,
-            246.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Item Details:",
-          "position": [
-            41.0,
-            300.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Currency:USD",
-          "position": [
-            43.0,
-            431.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Sub Total:",
-          "position": [
-            373.0,
-            428.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Exchange Rate:1.00",
-          "position": [
-            43.0,
-            446.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Total Amount Due (In USD):S13,000.00",
-          "position": [
-            42.0,
-            461.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Shipping Charges:",
-          "position": [
-            375.0,
-            461.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payment Method:",
-          "position": [
-            43.0,
-            577.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payment Method:Wire Transfer",
-          "position": [
-            43.0,
-            598.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "BankAccount Number:1234-5678-9012-3456",
-          "position": [
-            43.0,
-            614.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Payee Name:ABC Exports Ltd.",
-          "position": [
-            42.0,
-            630.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Date : September 30, 2030",
-          "position": [
-            466.0,
-            684.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Additional Notes:",
-          "position": [
-            41.0,
-            702.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Exporter Notes:Please handle with care during shipping.",
-          "position": [
-            43.0,
-            728.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Shipping Date:September 30,2030 Payment",
-          "position": [
-            44.0,
-            745.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Due Date:October 15,2030",
-          "position": [
-            44.0,
-            760.0
-          ]
-        }
-      ],
-      "features": {
-        "has_table": true,
-        "num_key_value_pairs": 26,
-        "text_density": 0.56,
-        "total_lines": 56
-      }
-    },
-    "classification": {
-      "doc_type": "invoice",
-      "confidence": 0.95
-    },
-    "detected_language": "en",
-    "processing_time": 11.257531881332397
-  },
-  {
-    "filename": "sample3.jpeg",
-    "full_text_ocr": "SUPERMARKET\nCty ndC2025\nLorem ipm258\nCashier\nManager.\nCnc Steer\nName\nPice\nCorempsun\n1\nLrmpmorst\nsnwa\n519.20\n$15.00\n1\n$15.00\nLoremiosum\n515.00\n515.00\nCoremipsum\n1\nSub Total\n$107.60\nCASH\nCHANCE\n$20000\now'ces\ns  s yu agi\nmootal",
-    "ocr_confidence": 0.811310755795446,
-    "layout": {
-      "title": null,
-      "sections": [],
-      "features": {
-        "has_table": true,
-        "num_key_value_pairs": 0,
-        "text_density": 0.29,
-        "total_lines": 29
-      }
-    },
-    "classification": {
-      "doc_type": "receipt",
-      "confidence": 0.95
-    },
-    "detected_language": "en",
-    "processing_time": 5.796797037124634
-  },
-  {
-    "filename": "sample2.png",
-    "full_text_ocr": "SA\nMalaysia Invoice\nInvoice no:\n100\nInvoice date\nJul13th.2021\ncena\nFeb13th.2021\nFrom\nBill to\nSaldo Apps\nShepard corp.\nJohn Smith\nshepard@mail.com\nwiz@saldoapps.com\n80296979597\n80296979597\nNorth str32,Chicogo.USA\nsaldoapps.com\nFirst str28-32,ChicagoUSA\nShipto\nNorth str32,Chicago.USA\nTrack#:RO80296979597\nDESCRIPTION\nRATE,CADA\nQTY\nTAX\nDISC\nAMOUNT,CADA\nPrototype\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPrototype-based programming is astye\nofobject-orientedprogramming\nDesign\n20,230,450.00\n2000\n20.50%\n20.50%\n20,230,450.00\nPaymontinstruction\nSubtotal:\nUSD8000.00\nPaypalemail\nDiscount 20%\nUSD0.00\nwiz@saldoapps.com\nShipping Cost\nUSD0.00\nMake checks payable to\nSalosTac\nUSD450.00\nJohn Smith\nTotat:\nUSD8,480.00\nBank Transfer\nAmount paid\nUSD0.00\nRoutingABA06120084\nBalance Due:\nUSD8,480.00\nNotes\nPrototype-basedprogrammingis a style of\nobject-oriented programming inwhich behaviour",
-    "ocr_confidence": 0.9546924438049544,
-    "layout": {
-      "title": "Malaysia Invoice",
-      "sections": [
-        {
-          "type": "key_value",
-          "text": "Malaysia Invoice",
-          "position": [
-            344.0,
-            63.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Invoice no:",
-          "position": [
-            429.0,
-            124.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "Invoice date",
-          "position": [
-            428.0,
-            138.0
-          ]
-        },
-        {
-          "type": "key_value",
-          "text": "North str32,Chicogo.USA",
+          "text": "6.Date of Issue",
           "position": [
             451.0,
-            264.0
+            282.0
           ]
         },
         {
           "type": "key_value",
-          "text": "North str32,Chicago.USA",
+          "text": "7. Date of Expiry",
           "position": [
+            751.0,
+            281.0
+          ]
+        },
+        {
+          "type": "key_value",
+          "text": "8.Passport No",
+          "position": [
+            248.0,
+            359.0
+          ]
+        },
+        {
+          "type": "key_value",
+          "text": "P<GBRTREVINO<<JULIE<<<<",
+          "position": [
+            35.0,
+            517.0
+          ]
+        }
+      ],
+      "all_boxes": [
+        {
+          "text": "REPUBLIC OF HACKATHON",
+          "bbox": [
+            253.0,
+            35.0,
+            598.0,
+            53.0
+          ],
+          "confidence": 0.9744277000427246,
+          "width": 345.0,
+          "height": 18.0
+        },
+        {
+          "text": "PASSPORT/PASSEPORT",
+          "bbox": [
+            253.0,
+            69.0,
+            523.0,
+            83.0
+          ],
+          "confidence": 0.9625318050384521,
+          "width": 270.0,
+          "height": 14.0
+        },
+        {
+          "text": "1.Surname/Nom",
+          "bbox": [
+            251.0,
+            122.0,
+            379.0,
+            136.0
+          ],
+          "confidence": 0.9925330281257629,
+          "width": 128.0,
+          "height": 14.0
+        },
+        {
+          "text": "2.Given Names/Prenoms",
+          "bbox": [
+            649.0,
+            122.0,
+            840.0,
+            136.0
+          ],
+          "confidence": 0.9729293584823608,
+          "width": 191.0,
+          "height": 14.0
+        },
+        {
+          "text": "TREVINO",
+          "bbox": [
+            250.0,
+            148.0,
+            347.0,
+            167.0
+          ],
+          "confidence": 0.9990301728248596,
+          "width": 97.0,
+          "height": 19.0
+        },
+        {
+          "text": "JULIE",
+          "bbox": [
+            648.0,
+            146.0,
+            710.0,
+            168.0
+          ],
+          "confidence": 0.9986498951911926,
+          "width": 62.0,
+          "height": 22.0
+        },
+        {
+          "text": "S",
+          "bbox": [
+            124.0,
+            203.0,
+            212.0,
+            290.0
+          ],
+          "confidence": 0.9458168148994446,
+          "width": 88.0,
+          "height": 87.0
+        },
+        {
+          "text": "3.Nationality /Nationalite",
+          "bbox": [
+            247.0,
+            201.0,
+            431.0,
+            218.0
+          ],
+          "confidence": 0.9707164764404297,
+          "width": 184.0,
+          "height": 17.0
+        },
+        {
+          "text": "1. Date of Birth",
+          "bbox": [
+            655.0,
+            201.0,
+            757.0,
+            219.0
+          ],
+          "confidence": 0.9362943768501282,
+          "width": 102.0,
+          "height": 18.0
+        },
+        {
+          "text": "UNITED STATES MINOR OUTLYING IS1ANDS/ 1967",
+          "bbox": [
+            246.0,
+            224.0,
+            781.0,
+            248.0
+          ],
+          "confidence": 0.9762148261070251,
+          "width": 535.0,
+          "height": 24.0
+        },
+        {
+          "text": "5.Sex/Sexe",
+          "bbox": [
+            249.0,
+            281.0,
+            345.0,
+            296.0
+          ],
+          "confidence": 0.9915895462036133,
+          "width": 96.0,
+          "height": 15.0
+        },
+        {
+          "text": "6.Date of Issue",
+          "bbox": [
+            451.0,
+            282.0,
+            561.0,
+            296.0
+          ],
+          "confidence": 0.9203063249588013,
+          "width": 110.0,
+          "height": 14.0
+        },
+        {
+          "text": "7. Date of Expiry",
+          "bbox": [
+            751.0,
+            281.0,
+            868.0,
+            299.0
+          ],
+          "confidence": 0.986294686794281,
+          "width": 117.0,
+          "height": 18.0
+        },
+        {
+          "text": "F",
+          "bbox": [
+            247.0,
+            305.0,
+            266.0,
+            327.0
+          ],
+          "confidence": 0.992838442325592,
+          "width": 19.0,
+          "height": 22.0
+        },
+        {
+          "text": "12 MAY 2002",
+          "bbox": [
             452.0,
-            326.0
-          ]
+            307.0,
+            581.0,
+            325.0
+          ],
+          "confidence": 0.9976786971092224,
+          "width": 129.0,
+          "height": 18.0
         },
         {
-          "type": "key_value",
-          "text": "Track#:RO80296979597",
-          "position": [
-            459.0,
-            340.0
-          ]
+          "text": "15 APR 2012",
+          "bbox": [
+            750.0,
+            307.0,
+            879.0,
+            325.0
+          ],
+          "confidence": 0.9798177480697632,
+          "width": 129.0,
+          "height": 18.0
         },
         {
-          "type": "key_value",
-          "text": "AMOUNT,CADA",
-          "position": [
-            516.0,
+          "text": "8.Passport No",
+          "bbox": [
+            248.0,
+            359.0,
+            356.0,
+            379.0
+          ],
+          "confidence": 0.9671197533607483,
+          "width": 108.0,
+          "height": 20.0
+        },
+        {
+          "text": "156343302",
+          "bbox": [
+            250.0,
+            386.0,
+            358.0,
             407.0
-          ]
+          ],
+          "confidence": 0.9995659589767456,
+          "width": 108.0,
+          "height": 21.0
         },
         {
-          "type": "key_value",
-          "text": "Amount paid",
-          "position": [
-            370.0,
-            644.0
-          ]
+          "text": "P<GBRTREVINO<<JULIE<<<<",
+          "bbox": [
+            35.0,
+            517.0,
+            728.0,
+            545.0
+          ],
+          "confidence": 0.9176828861236572,
+          "width": 693.0,
+          "height": 28.0
         },
         {
-          "type": "key_value",
-          "text": "Balance Due:",
-          "position": [
-            369.0,
-            670.0
-          ]
+          "text": "1563433027GBR6711148E1204159<<<",
+          "bbox": [
+            39.0,
+            563.0,
+            969.0,
+            592.0
+          ],
+          "confidence": 0.9643822312355042,
+          "width": 930.0,
+          "height": 29.0
         }
       ],
       "features": {
         "has_table": true,
         "num_key_value_pairs": 9,
-        "text_density": 0.67,
-        "total_lines": 67
+        "text_density": 0.2,
+        "total_lines": 20
       }
     },
     "classification": {
-      "doc_type": "receipt",
+      "doc_type": "passport",
       "confidence": 0.95
     },
     "detected_language": "en",
-    "processing_time": 11.647747039794922
+    "processing_time": 6.1999359130859375
   }
 ]

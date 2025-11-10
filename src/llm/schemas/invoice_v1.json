@@ -1,17 +1,27 @@
 {
+  "title": "invoice_v1",
   "type": "object",
-  "required": [
-    "invoice_number",
-    "invoice_date",
-    "vendor_name",
-    "total_amount",
-    "currency"
-  ],
   "properties": {
-    "invoice_number": { "type": ["string", "null"] },
-    "invoice_date": { "type": ["string", "null"] },
-    "vendor_name": { "type": ["string", "null"] },
-    "total_amount": { "type": ["number", "string", "null"] },
-    "currency": { "type": ["string", "null"] }
-  }
+    "invoice_id": { "type": "string" },
+    "issue_date": { "type": "string" },
+    "customer_name": { "type": "string" },
+    "customer_address": { "type": "string" },
+    "subtotal": { "type": "number" },
+    "tax_amount": { "type": "number" },
+    "total": { "type": "number" },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "quantity": { "type": "number" },
+          "unit_price": { "type": "number" },
+          "line_total": { "type": "number" }
+        },
+        "required": ["description", "quantity", "unit_price", "line_total"]
+      }
+    }
+  },
+  "required": ["invoice_id", "total"]
 }

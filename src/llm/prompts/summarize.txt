@@ -1,9 +1,0 @@
-Summarize the document in 3-5 concise sentences. Plain text only, no markdown.
-
-Focus on:
-- Main topic/purpose
-- Key findings or terms
-- Important dates/amounts if present
-
-Text:
-{TEXT}
