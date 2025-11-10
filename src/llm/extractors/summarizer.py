@@ -1,106 +1,31 @@
-from typing import Dict
+from typing import Optional
 from .smart_extractor import SmartExtractor
 
 class DocumentSummarizer(SmartExtractor):
     """
-    문서 요약 생성기
-    - Report: 핵심 내용, 결론 요약
-    - Contract: 주요 조항, 당사자, 기간 요약
+    report/contract 고급 요약. model/retries를 상속 초기화에서 그대로 사용.
     """
-    
-    def __init__(self, ollama_url="http://localhost:11434"):
-        super().__init__(ollama_url)
-    
+
+    def __init__(self, ollama_url: str = "http://localhost:11434", model: Optional[str] = None, retries: int = 0):
+        super().__init__(ollama_url=ollama_url, model=model, retries=retries)
+
     def summarize(self, text: str, doc_type: str) -> str:
-        """
-        문서 요약 생성
-        
-        Args:
-            text: 문서 전체 텍스트
-            doc_type: 문서 타입 (report or contract)
-        
-        Returns:
-            요약 텍스트
-        """
-        if doc_type not in ['report', 'contract']:
+        if doc_type not in ("report", "contract"):
             return ""
-        
-        # 텍스트가 너무 길면 앞부분만 (LLM context 제한)
-        text_snippet = text[:2000]
-        
-        if doc_type == 'report':
-            return self._summarize_report(text_snippet)
-        elif doc_type == 'contract':
-            return self._summarize_contract(text_snippet)
-        
-        return ""
-    
-    def _summarize_report(self, text: str) -> str:
-        """보고서 요약 (다국어 지원)"""
-        prompt = f"""Summarize this report document in 3-5 sentences.
-The document may be in English, Thai, Korean, Japanese, or other languages.
-
-Document text:
-{text}
-
-Focus on:
-- Main topic or purpose
-- Key findings or results
-- Important conclusions
-
-Instructions:
-- If the document is in a non-English language, summarize in English
-- Preserve key terms in original language if needed (e.g., proper nouns, technical terms)
-- Be concise and clear
-
-Summary (3-5 sentences in English):"""
-        
+        snippet = text[:2000]
+        if doc_type == "report":
+            prompt = (
+                "Summarize this report in 3-5 concise sentences. Plain text only.\n"
+                "Focus on: main topic, key findings/results, important conclusions.\n\n"
+                f"Text:\n{snippet}\n"
+            )
+        else:
+            prompt = (
+                "Summarize this contract in 3-5 concise sentences. Plain text only.\n"
+                "Focus on: parties, purpose, key terms/conditions, duration/dates.\n\n"
+                f"Text:\n{snippet}\n"
+            )
         try:
-            response = self._call_ollama(prompt)
-            # 응답에서 요약 추출
-            summary = response.strip()
-            
-            # 너무 길면 자르기 (500자 제한)
-            if len(summary) > 500:
-                summary = summary[:497] + "..."
-            
-            return summary
-            
-        except Exception as e:
-            print(f"Warning: Report summarization failed: {e}")
-            return "Summary generation failed."
-    
-    def _summarize_contract(self, text: str) -> str:
-        """계약서 요약 (다국어 지원)"""
-        prompt = f"""Summarize this contract document in 3-5 sentences.
-The document may be in English, Thai, Korean, Japanese, or other languages.
-
-Document text:
-{text}
-
-Focus on:
-- Parties involved
-- Main subject/purpose of contract
-- Key terms or conditions
-- Duration or dates (if mentioned)
-
-Instructions:
-- If the document is in a non-English language, summarize in English
-- Preserve party names and key terms in original language
-- Be concise and clear
-
-Summary (3-5 sentences in English):"""
-        
-        try:
-            response = self._call_ollama(prompt)
-            summary = response.strip()
-            
-            # 너무 길면 자르기 (500자 제한)
-            if len(summary) > 500:
-                summary = summary[:497] + "..."
-            
-            return summary
-            
-        except Exception as e:
-            print(f"Warning: Contract summarization failed: {e}")
-            return "Summary generation failed."
+            return (self._call_ollama(prompt) or "").strip()[:600]
+        except Exception:
+            return ""

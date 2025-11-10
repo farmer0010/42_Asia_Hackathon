@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "required": [
+    "invoice_number",
+    "invoice_date",
+    "vendor_name",
+    "total_amount",
+    "currency"
+  ],
+  "properties": {
+    "invoice_number": { "type": ["string", "null"] },
+    "invoice_date": { "type": ["string", "null"] },
+    "vendor_name": { "type": ["string", "null"] },
+    "total_amount": { "type": ["number", "string", "null"] },
+    "currency": { "type": ["string", "null"] }
+  }
+}

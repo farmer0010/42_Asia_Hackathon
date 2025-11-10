@@ -1,0 +1,8 @@
+Find PII. Return ONLY JSON with two arrays:
+{"names": [], "addresses": []}
+
+- "names": real people's full names (exclude organizations like Inc., Ltd., Co., Corp.)
+- "addresses": complete postal addresses
+
+Text:
+{TEXT}

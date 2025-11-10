@@ -84,13 +84,13 @@ if [ -d "venv" ]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         rm -rf venv
-        python3 -m venv venv
+        python3.11 -m venv venv
         echo -e "${GREEN}✓ 가상환경 재생성 완료${NC}"
     else
         echo "  건너뛰기..."
     fi
 else
-    python3 -m venv venv
+    python3.11 -m venv venv
     echo -e "${GREEN}✓ 가상환경 생성 완료${NC}"
 fi
 echo ""

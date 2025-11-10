@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": [
+    "merchant_name",
+    "purchase_date",
+    "total_amount",
+    "payment_method"
+  ],
+  "properties": {
+    "merchant_name": { "type": ["string", "null"] },
+    "purchase_date": { "type": ["string", "null"] },
+    "total_amount": { "type": ["number", "string", "null"] },
+    "payment_method": { "type": ["string", "null"] }
+  }
+}

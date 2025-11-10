@@ -1,0 +1,15 @@
+Return ONLY JSON:
+{
+  "person_name": "string or null",
+  "email": "string or null",
+  "phone": "string or null",
+  "years_experience": "number or null",
+  "skills": ["string", "..."]
+}
+Rules:
+- Deduplicate skills, up to 10.
+- Use null if missing.
+- Output ONLY JSON.
+
+Text:
+{TEXT}
