@@ -1,4 +1,5 @@
 # D:\42_asia-hackathon\app\main.py
+# [수정 완료된 파일]
 
 import os
 import uuid
@@ -14,11 +15,10 @@ from qdrant_client import models
 from pathlib import Path
 import requests
 
-# 🚨 [수정 6]: 모든 모듈이 config와 schemas의 새 이름을 사용하도록 함
 from .config import settings
 from .logger_config import setup_logging
 from .worker import process_document_pipeline, celery_app
-from . import schemas  # 수정된 schemas.py 임포트
+from . import schemas
 from .pipeline import llm_tasks
 
 setup_logging()
@@ -28,20 +28,21 @@ log = logging.getLogger("uvicorn")
 meili_client = None
 qdrant_cli = None
 
+# 🔴 [수정 1] MEILI_HOST_URL -> MEILI_URL
 try:
-    log.info(f"MeiliSearch 연결 시도: {settings.MEILI_HOST_URL}")
-    meili_client = meilisearch.Client(url=settings.MEILI_HOST_URL, api_key=settings.MEILI_MASTER_KEY)
+    log.info(f"MeiliSearch 연결 시도: {settings.MEILI_URL}")
+    meili_client = meilisearch.Client(url=settings.MEILI_URL, api_key=settings.MEILI_MASTER_KEY)
     if not meili_client.is_healthy():
         raise Exception("MeiliSearch is not healthy")
     log.info("MeiliSearch 연결 성공.")
 except Exception as e:
     log.error(f"MeiliSearch 연결 실패: {e}")
 
+# 🔴 [수정 2] QDRANT_HOST/PORT -> QDRANT_URL
 try:
-    log.info(f"Qdrant 연결 시도: {settings.QDRANT_HOST}:{settings.QDRANT_PORT}")
+    log.info(f"Qdrant 연결 시도: {settings.QDRANT_URL}")
     qdrant_cli = qdrant_client.QdrantClient(
-        host=settings.QDRANT_HOST,
-        port=settings.QDRANT_PORT
+        url=settings.QDRANT_URL  # host/port 대신 URL 사용
     )
     qdrant_cli.get_collections()  # 헬스 체크 대용
     log.info("Qdrant 연결 성공.")
@@ -49,7 +50,7 @@ except Exception as e:
     log.error(f"Qdrant 연결 실패: {e}")
 
 QDRANT_COLLECTION_NAME = "documents_collection"
-VECTOR_DIMENSION = settings.VECTOR_DIMENSION  # config.py의 VECTOR_DIMENSION 사용
+VECTOR_DIMENSION = settings.VECTOR_DIMENSION
 
 
 def setup_databases():
@@ -124,7 +125,7 @@ def health_check():
         health_results["redis"] = str(e)
     if qdrant_cli:
         try:
-            qdrant_cli.get_collections()  # health_check() 대신
+            qdrant_cli.get_collections()
             health_results["qdrant"] = "ok"
         except Exception as e:
             health_results["qdrant"] = str(e)
@@ -141,7 +142,7 @@ def health_check():
     else:
         health_results["meilisearch"] = "client not initialized"
     try:
-        response = requests.get(f"{settings.LLM_API_BASE_URL}/health", timeout=1)  # settings.LLM_API_BASE_URL 사용
+        response = requests.get(f"{settings.LLM_API_BASE_URL}/health", timeout=1)
         if response.status_code == 200:
             health_results["llm_server"] = "ok"
         else:
@@ -153,58 +154,78 @@ def health_check():
         return schemas.HealthCheck(status="error", services=health_results)
     return schemas.HealthCheck(status="ok", services=health_results)
 
+
 @app.get("/search", tags=["Search"], response_model=schemas.SearchResponse)
-async def search_documents(query: str):
+async def search_documents(query: str, limit: int = 10):
     """
-    MeiliSearch를 사용한 전문 검색 엔드포인트.
+    MeiliSearch와 Qdrant를 사용한 하이브리드 검색.
     frontend/script.js 가 이 API를 호출합니다.
     """
-    if not meili_client:
-        log.error("MeiliSearch 클라이언트가 초기화되지 않았습니다.")
+    if not meili_client or not qdrant_cli or not llm_tasks.embed_model:
+        log.error("Search, Vector, or Embedding client is not initialized.")
         raise HTTPException(status_code=503, detail="Search service is not available")
 
     try:
-        # 이 파일(main.py) 상단에 이미 정의된 meili_client를 사용합니다.
-        index = meili_client.index("documents")
-        search_results = index.search(query)
+        # 1. MeiliSearch (Keyword Search)
+        log.info(f"MeiliSearch (Keyword) 쿼리: '{query}'")
+        meili_index = meili_client.index("documents")
+        # 🔴 [수정] script.js의 스키마 불일치 해결 (doc_type, snippet 반환)
+        search_results = meili_index.search(
+            query,
+            {'limit': limit, 'attributesToRetrieve': ['document_id', 'filename', 'doc_type', 'snippet']}
+        )
+        exact_hits = search_results.get('hits', [])
 
-        # frontend(script.js) 가 기대하는 형식({"hits": [...]})으로 응답
-        return {"hits": search_results.get('hits', [])}
+        # 2. Qdrant (Semantic Search)
+        log.info(f"Qdrant (Semantic) 쿼리: '{query}'")
+        query_vector = llm_tasks.embed_model.encode(query).tolist()
+
+        semantic_hits_response = qdrant_cli.search(
+            collection_name="document_chunks",
+            query_vector=query_vector,
+            limit=limit,
+            with_payload=True  # payload(메타데이터) 포함
+        )
+
+        # 3. 결과 포맷팅 (script.js가 기대하는 형식으로)
+        semantic_hits = []
+        for hit in semantic_hits_response:
+            payload = hit.payload
+            semantic_hits.append({
+                "document_id": payload.get("document_id"),
+                "filename": payload.get("filename", "Unknown"),
+                "doc_type": payload.get("doc_type", "Unknown"),
+                "snippet": payload.get("text", "No snippet available.")  # text 필드를 snippet으로 사용
+            })
+
+        # 4. SearchResponse 스키마에 맞춰 반환
+        return schemas.SearchResponse(
+            exact_matches=exact_hits,
+            semantic_matches=semantic_hits
+        )
 
     except Exception as e:
         log.error(f"Search query '{query}' 처리 중 오류 발생: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
-@app.get("/job/{job_id}", status_code=status.HTTP_200_OK, response_model=schemas.JobStatusResponse)  # 🚨 [수정] 스키마 이름 변경
-async def get_job_status(job_id: str):
-    log.info(f"작업 상태 조회 요청: {job_id}")
-    try:
-        task_result = celery_app.AsyncResult(job_id)
-        status = task_result.status
-        result = task_result.result
-        if status == "PENDING":
-            log.warning(f"'{job_id}'에 대한 작업을 찾을 수 없습니다 (PENDING).")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job ID {job_id} not found.")
-        if status == "FAILURE":
-            log.warning(f"작업 실패: {job_id}, Error: {str(result)}")
-            return schemas.JobStatusResponse(job_id=job_id, status=status, message=str(result))
-        return schemas.JobStatusResponse(job_id=job_id, status=status, result=result)
-    except Exception as e:
-        log.error(f"작업 상태 조회 중 예외 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving job status")
 
-
-@app.post("/upload", status_code=status.HTTP_202_ACCEPTED, response_model=schemas.UploadResponse)  # 🚨 [수정] 스키마 이름 변경
+# 🔴 [수정 3] 엔드포인트 이름을 /upload -> /uploadfile/ 로 변경 (끝에 / 포함)
+@app.post("/uploadfile/", status_code=status.HTTP_202_ACCEPTED, response_model=schemas.UploadResponse)
 async def upload_document(file: UploadFile = File(...)):
     job_id = str(uuid.uuid4())
-    temp_dir = Path("/tmp/doc_uploads")
-    temp_dir.mkdir(exist_ok=True)
+
+    # 🚨 [경로 수정] 공유 볼륨 /uploads_data/input/ 사용
+    temp_dir = Path("/uploads_data/input/")
+    temp_dir.mkdir(parents=True, exist_ok=True)  # parents=True 추가
+
     file_ext = Path(file.filename).suffix
     temp_file_path = temp_dir / f"{job_id}{file_ext}"
     try:
-        log.info(f"[{job_id}] 파일 수신: {file.filename}, 임시 저장 위치: {temp_file_path}")
+        log.info(f"[{job_id}] 파일 수신: {file.filename}, 공유 볼륨 저장 위치: {temp_file_path}")
         with open(temp_file_path, "wb") as buffer:
             buffer.write(await file.read())
+
+        # Celery 작업 호출
         process_document_pipeline.delay(
             job_id=job_id,
             file_path=str(temp_file_path),
@@ -218,3 +239,29 @@ async def upload_document(file: UploadFile = File(...)):
         if temp_file_path.exists():
             os.remove(temp_file_path)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"File processing error: {e}")
+
+
+# 🚨 [수정] JobStatusResponse -> TaskStatusResponse
+@app.get("/tasks/{task_id}", status_code=status.HTTP_200_OK, response_model=schemas.TaskStatusResponse)
+async def get_task_status(task_id: str):
+    log.info(f"작업 상태 조회 요청: {task_id}")
+    try:
+        task_result = celery_app.AsyncResult(task_id)
+        status = task_result.status
+        result = task_result.result
+
+        if status == "PENDING":
+            log.warning(f"'{task_id}'에 대한 작업을 찾을 수 없습니다 (PENDING).")
+            # 404 대신 PENDING 상태를 반환 (프론트엔드가 폴링)
+            return schemas.TaskStatusResponse(task_id=task_id, status="PENDING")
+
+        if status == "FAILURE":
+            log.warning(f"작업 실패: {task_id}, Error: {str(result)}")
+            return schemas.TaskStatusResponse(task_id=task_id, status=status, result={"error": str(result)})
+
+        # 🚨 [수정] 성공 시, result가 PipelineResult 객체여야 함
+        return schemas.TaskStatusResponse(task_id=task_id, status=status, result=result)
+
+    except Exception as e:
+        log.error(f"작업 상태 조회 중 예외 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving task status")
