@@ -1,0 +1,140 @@
+# 핵심 과제 (필수 사항)
+문서 분류 (Document Classification):
+문서를 5가지 유형(예: 인보이스, 영수증, 이력서, 보고서, 계약서)으로 정확하게 분류해야 합니다.
+시스템은 레이아웃, 텍스트 내용, 시각적 단서 등을 기반으로 문서 유형을 자동으로 식별해야 합니다.
+OCR 추출 (OCR Extraction):
+주로 영문 텍스트(손글씨 포함)에 대해 광학 문자 인식(OCR)을 수행해야 합니다.
+이 과제는 상당한 난이도가 있으며, 그 자체만으로도 매우 가치 있는 솔루션입니다.
+구조화된 데이터 추출 (Structured Data Extraction):
+한두 가지 문서 유형(예: 인보이스, 영수증)에 대해, 핵심 정보를 JSON과 같은 구조화된 형식으로 추출해야 합니다.
+이는 일반적인 텍스트 요약보다 더 가치가 높습니다.
+인보이스 예시:
+{
+ "vendor": "Company A",
+ "invoice_date": "2025-08-19",
+ "total_amount": 1500.75,
+ "currency": "THB"
+}
+# 보너스 목표 (구현하면 좋은 기능)
+확장된 언어 지원 (Expanded Language Support): 태국어, 일본어, 한국어, 중국어 등 더 많은 언어에 대한 추가 지원.
+고급 요약 (Advanced Summarization): 보고서, 계약서, 법률 합의서 등 복잡하고 긴 문서의 핵심 사항이나 섹션을 강조하여 간결하고 일관성 있는 요약 생성.
+검색 및 인덱싱 (Search & Indexing):
+추출된 데이터를 Elasticsearch나 OpenSearch와 같은 검색 엔진에서 인덱싱하기 적합한 형식으로 출력.
+효율적인 필터링 및 검색을 위한 메타데이터 태깅 지원.
+규정 준수 기능 (Compliance Feature):
+이름, 주소, ID 번호와 같은 개인 식별 정보(PII)를 자동으로 탐지하고 플래그를 지정하거나 마스킹 처리.
+추출 및 저장된 데이터가 PDPA, GDPR과 같은 개인 정보 보호 및 규정 준수 표준을 준수하도록 보장.
+제안된 해커톤 프로세스 가이드라인
+입력 (Input): 리소스 제공
+데이터셋:
+사전 레이블링된 문서 세트 (인보이스, 영수증, 양식, 보고서)
+규칙 및 기대사항 (Rules & Expectations)
+시간제한: 48시간
+팀 구성: 최대 5명
+요구사항: 반드시 오픈소스 AI/ML 도구를 사용해야 함
+출력 (Output):
+단일 스크립트 또는 컨테이너 형태로 제출.
+입력(Input) 데이터를 처리하여 결과물(classification.json, ocr.txt, summary.txt 등)을 출력해야 함.
+데이터셋 (The Dataset)
+훈련(Train) 및 테스트(Test)용 데이터셋
+데이터셋은 두 부분으로 나뉘어 제공됩니다:
+training_set: 문서와 정답이 포함된 labels.csv 파일로 구성됩니다.
+testing_set: 문서만 포함됩니다. 레이블(정답)은 비공개입니다.
+사용 방법:
+training_set을 사용하여 모델을 구축하고 훈련시키세요.
+최종 솔루션은 공개되지 않은 testing_set에 대한 성능으로 평가됩니다.
+목표:
+단순히 훈련 데이터를 암기하는 모델이 아닌, 학습하고 일반화할 수 있는 모델을 구축하는 것입니다.
+hackathon_dataset/
+├── training_set/
+│   ├── documents/
+│   │   ├── inv_001.pdf
+│   │   ├── inv_002.png
+│   │   ├── receipt_001.jpg
+│   │   ├── form_xyz.pdf
+│   │   └── ... (예: 500-1000개 문서)
+│   └── labels.csv  <-- 훈련용 문서들의 "정답" 파일
+└── testing_set/
+    └── documents/
+        ├── test_doc_01.png
+        ├── test_doc_02.pdf
+        ├── test_doc_03.jpg
+        └── ... (예: 100-200개 문서, 레이블 제공 안 됨)
+출력 형식 (Output Format)
+하나의 문서(invoice_123.pdf)를 처리했을 때의 결과 예시입니다.
+{
+  // 처리한 파일의 이름
+  "filename": "invoice_123.pdf",
+
+  // 문서 분류 결과
+  "classification": {
+    "doc_type": "invoice",  // 문서 종류 (예: 인보이스)
+    "confidence": 0.98      // 분류 정확도 (신뢰도 점수)
+  },
+
+  // 문서 전체를 OCR로 읽은 텍스트
+  "full_text_ocr": "The entire OCR'd text content goes here...",
+
+  // 핵심 정보 추출 결과 (인보이스나 영수증 등)
+  "extracted_data": {
+    "vendor": "CDG Group",        // 판매자
+    "invoice_date": "2025-08-19", // 청구 날짜
+    "total_amount": 7500.00,      // 총액
+    "currency": "THB"             // 통화
+  },
+
+  // 문서 요약 결과 (보고서나 긴 계약서 등)
+  "summary": "This is a summary of the document for reports or long contracts.",
+
+  // 탐지된 개인 식별 정보(PII) 목록
+  "pii_detected": [
+    {
+      "type": "PERSON_NAME",  // 종류: 사람 이름
+      "text": "John Doe"        // 탐지된 텍스트
+    },
+    {
+      "type": "THAI_ID",      // 종류: 태국 ID 번호
+      "text": "1-1020-30405-60-7"
+    }
+  ]
+}
+심사기준
+핵심 기능성 (Core Functionality)
+보너스 기능 및 통합 (Bonus Features & Integration)
+성능 및 사용성 (Performance & Usability)
+혁신성 및 기술적 접근 방식 (Innovation & Technical Approach)
+발표 및 피칭 (Presentation & Pitching)
+(편집됨)
+7:22
+공항철도(ARL) 이용 안내
+공항에서 공항철도(ARL)를 타고 랏끄라방(Lat Krabang) 역에서 내리세요.
+노선도 설명:
+**수완나품 공항(Suvarnabhumi Airport)**에서 출발하여 첫 번째 역인 **랏끄라방(Lat Krabang)**까지는 5분이 소요됩니다.
+공항에서 도심(Phaya Thai 역)까지의 총 이동 시간은 26분입니다.
+추가 정보 (택시 및 그랩 이용):
+근처에 숙소를 잡고 택시나 그랩(Grab) 서비스를 이용하는 것을 추천합니다. 따로 이동하는 것보다 저렴하며, 택시 요금은 35바트부터 시작합니다.
+
+
+hyunahn
+:gaeul:  오후 7:27
+특히 심사기준
+핵심기능성:
+문서 분류, OCR(영어), 구조화된 데이터 추출을 포함한 핵심 기능의 정확도 및 성능
+보너스 기능 및 통합:
+2. 다국어 지원, 요약, 검색 통합, 개인 식별 정보(PII) 마스킹 등 핵심 범위를 넘어서는 추가 또는 향상된 기능
+성능 및 사용성:
+처리 속도 (분당 문서 처리량)
+ 2. 자원 효율성 (도커 컨테이너의 CPU/RAM 사용량), 사용자 경험 (UI/UX)의 향상
+혁신성 및 기술적 접근 방식:
+ 1. 오픈소스 모델의 창의적인 사용</li><li>까다로운 문제를 얼마나 잘 해결했는가
+ 2.기술 설계, AI/ML 방법(예: LLM, RAG, Vision-Language 모델)을 활용한 문제 해결 접근 방식의 창의성 및 확장성이 잘 드러나는가?
+발표 및 피칭:
+발표의 명확성이 드러나는가?
+자신들의 솔루션과 잠재적인 비즈니스 영향을 얼마나 잘 설명하는가?
+
+
+
+
+
+
+

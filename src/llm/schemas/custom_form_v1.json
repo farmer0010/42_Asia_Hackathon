@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "formInfo": {
+      "type": "object",
+      "properties": {
+        "documentTitle": { "type": ["string", "null"] },
+        "authority": { "type": ["string", "null"] },
+        "metadata": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "passengerInformation": {
+      "type": "object",
+      "properties": {
+        "sectionTitle": { "type": ["string", "null"] },
+        "fullName": { "type": ["string", "null"] },
+        "occupation": { "type": ["string", "null"] },
+        "passportNumber": { "type": ["string", "null"] },
+        "arrivingFlightNo": { "type": ["string", "null"] },
+        "dateOfBirth": { "type": ["string", "null"] },
+        "nationality": { "type": ["string", "null"] },
+        "accompanyingFamilyMembers": { "type": ["number", "string", "null"] },
+        "fromCity": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "declaration": {
+      "type": "object",
+      "properties": {
+        "sectionTitle": { "type": ["string", "null"] },
+        "status": {
+          "type": "object",
+          "properties": {
+            "hasArticlesToDeclare": { "type": ["boolean", "null"] },
+            "hasExcessCurrency": { "type": ["boolean", "null"] },
+            "hasNothingToDeclare": { "type": ["boolean", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "declaredItems": { "type": "array" },
+        "signature": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

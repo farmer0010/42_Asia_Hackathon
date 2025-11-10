@@ -1,0 +1,28 @@
+You are a strict document-type classifier.
+
+POSSIBLE_LABELS (choose exactly one):
+- passport
+- resume
+- invoice
+- purchase_order
+- custom_form
+- unknown
+
+Guidelines:
+- Use layout.title, sections, ALL boxes (text+bbox), and keywords.
+- Prefer explicit cues:
+  * passport: MRZ lines (start with "P<"), fields like "Passport No", nationality codes (3 letters), “Date of Birth/Issue/Expiry”.
+  * resume: sections like "Work Experience", "Skills", "Education", multiple bullet points, person’s contact at top or sidebar.
+  * invoice: "Invoice", "Invoice No/Number", line items table, Subtotal/Tax/Total.
+  * purchase_order: "Purchase Order" title; Buyer/Vendor both present; PO No/PR No; signature/approver often at bottom.
+  * custom_form: "Declaration Form"/authority header; Part 1/Part 2 sections; checkboxes (☑, [X], ✓).
+
+Use these disambiguation rules:
+- If both Buyer and Vendor and "PO Number" appear → purchase_order (NOT invoice).
+- If MRZ present → passport (even if other words exist).
+- If it’s a personal profile with experience/skills → resume.
+- Customs/Passenger declaration with checkboxes → custom_form.
+- If uncertain → unknown.
+
+Output strictly JSON (no prose):
+{"doc_type": "<one_of_the_labels>", "confidence": <0..1 float>}

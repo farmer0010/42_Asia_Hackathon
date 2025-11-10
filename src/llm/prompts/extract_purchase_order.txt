@@ -1,0 +1,10 @@
+Purchase Order has 3 common format variants.
+Header (Y<200): Title + PO info (po_number, po_date, delivery_date_str, project_number).
+Parties (Y≈250-350): Buyer(left) / Vendor(right).
+Items Table (Y≈400-700).
+Totals (Y≈750-850): subtotal, vat_amount, grand_total.
+Signature (Y>850): approver_name, approver_title.
+
+Differentiate from invoice: Buyer & Vendor are both present; has Delivery Date.
+
+Return JSON with keys exactly as schema.

@@ -1,0 +1,186 @@
+[
+  {
+    "filename": "sample4.jpg",
+    "result": {
+      "full_text": "Adress:1234Lorem Ipsum,Do1or\nTe1123456-7890-\nDate:0101-2018)\n1035\nLorem\n650\nFIpsum\n7.50\nDolorsrt\n8.00\nAm\n9.30\nConse\n1\nrAdipiscin\nSedDor\nAMOUNT\nSub total\n68\nSalesTax\n8.00\nF.\nBalance\n84.80",
+      "layout": {
+        "title": null,
+        "sections": [
+          {
+            "type": "key_value",
+            "text": "Adress:1234Lorem Ipsum,Do1or",
+            "position": [
+              225.0,
+              124.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Date:0101-2018)",
+            "position": [
+              214.0,
+              203.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "AMOUNT",
+            "position": [
+              216.0,
+              505.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Sub total",
+            "position": [
+              213.0,
+              556.0
+            ]
+          }
+        ],
+        "features": {
+          "has_table": true,
+          "num_key_value_pairs": 4,
+          "text_density": 0.24,
+          "total_lines": 24
+        }
+      },
+      "confidence": 0.8880241091052691,
+      "processing_time": 6.899013042449951,
+      "detected_language": "en"
+    }
+  },
+  {
+    "filename": "sample1.jpg",
+    "result": {
+      "full_text": "Commercial\nInvoice\nPnvoceNambera\nInvoceDater\n2023.001\nSeptember30.2030\nExporter Information\nImporterInformation.\nCompany NameABC Expors td.\nConsignee Name:Xyz Importers Inc\nCompany Address123 Exponter StreeExpon City\nComsigneeAddress:456 ImporterStreetImport City\nPhoneNumbe1234567890\nDeittnation Country:mportant\nEmaillnfobexportscom\nCustoms Dratlon NumberCDN202s.001\ntem Detl\nN\nDescriptiono Goods\nQuntiy\nuntPilce\nTo\nwidget Modetx\n500!\n$10.00\n$5.000.00\n2.\n300'\n$15.00\n$4,500.00\nTaizmoModelz\n200\n3\n$4.000.0\nSub Total,\n$13,500.00\nExchange Rate1.00\n000\nTott Amount Duein UsDs13.000.00\nShlpping Charges$soo.00\n$13.000.00\nPayment Method\nPayment MethodWire Transfer\nBankAcountNumber:2234-56789012-3456\nPayce NamcABc Exports Ltd\nDate:September30.2050\nAdaltionalNotei\nExpoter Notes:Plesse handle with care duting shipping\nShipping Date:Scptember30.2030Payment\nDue DateOctober152030\nxYImporternc",
+      "layout": {
+        "title": "Commercial",
+        "sections": [
+          {
+            "type": "key_value",
+            "text": "Invoice",
+            "position": [
+              219.0,
+              68.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "InvoceDater",
+            "position": [
+              388.0,
+              81.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Consignee Name:Xyz Importers Inc",
+            "position": [
+              341.0,
+              183.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "ComsigneeAddress:456 ImporterStreetImport City",
+            "position": [
+              339.0,
+              199.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Deittnation Country:mportant",
+            "position": [
+              340.0,
+              215.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Descriptiono Goods",
+            "position": [
+              80.0,
+              325.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Sub Total,",
+            "position": [
+              370.0,
+              423.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Tott Amount Duein UsDs13.000.00",
+            "position": [
+              40.0,
+              458.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "BankAcountNumber:2234-56789012-3456",
+            "position": [
+              39.0,
+              613.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Date:September30.2050",
+            "position": [
+              466.0,
+              683.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "AdaltionalNotei",
+            "position": [
+              43.0,
+              703.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Expoter Notes:Plesse handle with care duting shipping",
+            "position": [
+              44.0,
+              727.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Shipping Date:Scptember30.2030Payment",
+            "position": [
+              44.0,
+              744.0
+            ]
+          },
+          {
+            "type": "key_value",
+            "text": "Due DateOctober152030",
+            "position": [
+              42.0,
+              758.0
+            ]
+          }
+        ],
+        "features": {
+          "has_table": true,
+          "num_key_value_pairs": 14,
+          "text_density": 0.51,
+          "total_lines": 51
+        }
+      },
+      "confidence": 0.815983445036645,
+      "processing_time": 12.095782041549683,
+      "detected_language": "en"
+    }
+  }
+]

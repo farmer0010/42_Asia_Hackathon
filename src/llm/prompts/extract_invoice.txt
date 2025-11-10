@@ -1,0 +1,9 @@
+You extract invoice data with a table:
+Header fields: invoice_id, issue_date, customer_name, customer_address
+Line items: description, quantity, unit_price, line_total
+Totals: subtotal, tax_amount, total
+
+Use row grouping by similar Y to detect rows; columns by X ordering.
+Validate: sum(line_total) ≈ subtotal; subtotal + tax_amount ≈ total.
+
+JSON only; use null if missing.

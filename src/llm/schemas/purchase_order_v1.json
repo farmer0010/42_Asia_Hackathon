@@ -1,0 +1,52 @@
+{
+  "title": "purchase_order_v1",
+  "type": "object",
+  "properties": {
+    "po_number": { "type": "string" },
+    "po_date": { "type": "string" },
+    "po_date_str": { "type": "string" },
+    "delivery_date_str": { "type": "string" },
+    "project_number": { "type": "string" },
+    "project_name": { "type": "string" },
+    "buyer": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "tax_id": { "type": "string" }
+      }
+    },
+    "vendor": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "tax_id": { "type": "string" }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "quantity": { "type": "number" },
+          "unit": { "type": "string" },
+          "unit_price": { "type": "number" },
+          "total": { "type": "number" },
+          "type": { "type": "string" }
+        }
+      }
+    },
+    "subtotal": { "type": "number" },
+    "vat_amount": { "type": "number" },
+    "grand_total": { "type": "number" },
+    "grand_total_en_str": { "type": "string" },
+    "service_total": { "type": "number" },
+    "wht_amount": { "type": "number" },
+    "net_payable": { "type": "number" },
+    "approver_name": { "type": "string" },
+    "approver_title": { "type": "string" }
+  },
+  "required": ["po_number", "grand_total"]
+}

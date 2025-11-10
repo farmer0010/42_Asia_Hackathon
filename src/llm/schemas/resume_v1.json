@@ -1,0 +1,38 @@
+{
+  "title": "resume_v1",
+  "type": "object",
+  "properties": {
+    "template_used": { "type": "string" },
+    "contact_info": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" }
+      }
+    },
+    "summary": { "type": "string" },
+    "work_experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "company": { "type": "string" },
+          "dates": { "type": "string" },
+          "description": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "education": {
+      "type": "object",
+      "properties": {
+        "institution": { "type": "string" },
+        "degree": { "type": "string" },
+        "graduation_year": { "type": "number" }
+      }
+    },
+    "skills": { "type": "array", "items": { "type": "string" } }
+  }
+}
