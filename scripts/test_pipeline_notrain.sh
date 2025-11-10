@@ -3,20 +3,6 @@
 # ============================================================
 # 테스트 파이프라인 (훈련 없이 전체 테스트)
 # ============================================================
-# 
-# 사용법:
-#   ./scripts/test_pipeline_notrain.sh
-#
-# 기능:
-#   1. OCR + 레이아웃 분석
-#   2. 수동 doc_type 할당 (분류 모델 없이)
-#   3. LLM 추출 + PII + 요약
-#
-# 요구사항:
-#   - Python 가상환경 활성화
-#   - Ollama 실행 중 (ollama serve)
-#   - data/input/ 에 테스트 파일
-# ============================================================
 
 set -e
 
@@ -37,6 +23,9 @@ echo ""
 cd "$(dirname "$0")/.." || exit 1
 export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
+# ==== 추가: 기본 모델 설정 (환경변수 MODEL로 override 가능) ====
+MODEL=${MODEL:-qwen2.5:7b}
+
 # 환경 확인
 if [ -z "$VIRTUAL_ENV" ]; then
     echo -e "${RED}✗ Virtual environment not activated!${NC}"
@@ -48,6 +37,12 @@ if ! curl -s "http://localhost:11434" > /dev/null 2>&1; then
     echo -e "${RED}✗ Ollama not running!${NC}"
     echo "  Please run: ollama serve"
     exit 1
+fi
+
+# ==== 추가: 해당 모델이 로컬에 있는지 확인 ====
+if ! ollama list | awk '{print $1}' | grep -qx "$MODEL"; then
+    echo -e "${YELLOW}… Model '$MODEL' not found locally. Pulling…${NC}"
+    ollama pull "$MODEL"
 fi
 
 # 입력 파일 확인
@@ -120,7 +115,8 @@ START_TIME=$(date +%s)
 python src/llm/converter.py \
     --input data/output/predictions_with_types.json \
     --output data/output/test_final_results.json \
-    --ollama-url http://localhost:11434
+    --ollama-url http://localhost:11434 \
+    --model "$MODEL"
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}✗ LLM processing failed!${NC}"
@@ -152,6 +148,5 @@ echo "  📄 data/output/predictions_ocr_only.json       (OCR + Layout)"
 echo "  📄 data/output/predictions_with_types.json     (+ Manual Types)"
 echo "  📄 data/output/test_final_results.json         (Final Results)"
 echo ""
-echo -e "${BLUE}💡 Tip: Check test_final_results.json for extracted data!${NC}"
+echo -e "${BLUE}💡 Tip: MODEL is '${MODEL}'. Override with: MODEL=qwen2.5:7b ./scripts/test_pipeline_notrain.sh${NC}"
 echo ""
-
