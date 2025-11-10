@@ -51,17 +51,21 @@ class DocumentClassifier:
         print(f"  ✓ Document types: {', '.join(self.labels)}")
         print(f"  ✓ Ready for training and inference")
 
-    def train(self, labels_csv_path, ocr_results_path, output_dir='models/classifier'):
+    def train(self, groundtruth_json_path, ocr_results_path, output_dir='models/classifier'):
         print("Training Classification Model")
     
         # Step 1: 데이터 로드
         print("\nStep 1: Loading data...")
-        df = pd.read_csv(labels_csv_path)
         
+        # Groundtruth JSON 로드
+        with open(groundtruth_json_path, 'r', encoding='utf-8') as f:
+            groundtruth = json.load(f)
+        
+        # OCR 결과 JSON 로드
         with open(ocr_results_path, 'r', encoding='utf-8') as f:
             ocr_results = json.load(f)
         
-        print(f"Loaded {len(df)} labels from CSV")
+        print(f"Loaded {len(groundtruth)} labels from groundtruth JSON")
         print(f"Loaded {len(ocr_results)} OCR results")
         
         # Step 2: 학습 데이터 준비
@@ -70,9 +74,22 @@ class DocumentClassifier:
         labels = []
         skipped = 0
         
-        for _, row in df.iterrows():
-            filename = row['filename']
-            doc_type = row['doc_type']
+        for filename in groundtruth.keys():
+            # 파일명에서 문서 타입 추론
+            if filename.startswith('invoice_'):
+                doc_type = 'invoice'
+            elif filename.startswith('passport_'):
+                doc_type = 'passport'
+            elif filename.startswith('resume_'):
+                doc_type = 'resume'
+            elif filename.startswith('PO_'):
+                doc_type = 'purchase_order'
+            elif filename.startswith('Customs_Form_'):
+                doc_type = 'custom_form'
+            else:
+                print(f"Warning: {filename} 문서 타입을 알 수 없습니다, skipping...")
+                skipped += 1
+                continue
             
             if filename not in ocr_results:
                 print(f"Warning: {filename} not found in OCR results, skipping...")

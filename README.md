@@ -34,13 +34,16 @@ scripts/test_pipeline_notrain.sh
 **분류 모델을 학습한 후 실행:**
 
 ```bash
-# 1. 분류 모델 학습 (해커톤 당일)
+# 1. Groundtruth 파일 병합
+python3 scripts/merge_groundtruth.py
+
+# 2. 분류 모델 학습 (해커톤 당일)
 python src/classification/trainer.py \
-  --labels training_set/labels.csv \
+  --groundtruth config/groundtruth_merged.json \
   --ocr data/output/training_ocr.json \
   --output data/models/classifier
 
-# 2. 전체 파이프라인 실행
+# 3. 전체 파이프라인 실행
 scripts/run_local.sh
 ```
 
