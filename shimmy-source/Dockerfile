@@ -16,7 +16,7 @@ COPY benches/ ./benches/
 COPY templates/ ./templates/
 
 # Build the application
-RUN cargo build --release --features "huggingface cuda" --bin shimmy
+RUN cargo build --release --features "huggingface full" --bin shimmy
 
 # Runtime stage
 #FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 AS runtime
