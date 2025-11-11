@@ -1,12 +1,27 @@
-System: Detect PII and return ONLY a JSON array.
-Each item: {"type":"PERSON_NAME|PHONE|EMAIL|ADDRESS|NATIONAL_ID|PASSPORT|THAI_ID","text":"..."}
+You detect PII in arbitrary text. Return only JSON.
+
+Detect these PII types (case-sensitive keys):
+- EMAIL
+- PHONE_NUMBER
+- CREDIT_CARD
+- PASSPORT_NUMBER
+- NATIONAL_ID
+- PERSON_NAME
+- ADDRESS
+
 Rules:
-- Output ONLY JSON (no markdown/code fences).
-- Prefer PERSON_NAME only for real person names (exclude organizations like Inc., Ltd., Co., Corp.).
-- PHONE must appear on a line that clearly indicates phone/tel/contact (e.g., "Phone", "Tel", "전화").
-  Do NOT classify invoice numbers, account numbers, or IDs as PHONE.
-- THAI_ID format example: 1-2345-67890-12-3 (exact digit grouping).
-- If multiple types could apply, choose the most specific (e.g., THAI_ID over NATIONAL_ID).
-- Use [] if none.
+1) Output ONLY valid JSON with this shape:
+{
+  "items": [
+    {"type":"EMAIL","text":"..."},
+    {"type":"PHONE_NUMBER","text":"..."}
+  ]
+}
+2) Do not include explanations.
+3) For phone numbers: allow separators (space, -, (), country code).
+4) For passport/national IDs: be conservative; prefer well-formed patterns.
+5) Names: prefer FULL PERSON names over organizations; skip single short tokens.
+6) Address: must look like a location with number/street/city components.
+
 Text:
-{TEXT}
+{{TEXT}}

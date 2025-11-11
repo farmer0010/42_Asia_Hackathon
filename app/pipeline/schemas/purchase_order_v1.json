@@ -1,0 +1,82 @@
+{
+  "title": "purchase_order_v2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "po_number": { "type": "string" },
+    "po_date": { "type": "string", "format": "date-time" },
+    "po_date_str": { "type": "string" },
+    "delivery_date_str": { "type": "string" },
+    "project_number": { "type": "string" },
+    "project_name": { "type": "string" },
+    "buyer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "tax_id": { "type": "string", "pattern": "^\\d{13}$" }
+      },
+      "required": ["name", "address", "tax_id"]
+    },
+    "vendor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "tax_id": { "type": "string", "pattern": "^\\d{13}$" }
+      },
+      "required": ["name", "address", "tax_id"]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "quantity": { "type": "number" },
+          "unit": { "type": "string", "enum": ["Unit(s)", "Set", "Service"] },
+          "unit_price": { "type": "number" },
+          "total": { "type": "number" },
+          "type": { "type": "string", "enum": ["hardware", "software", "service"] }
+        },
+        "required": ["name", "quantity", "unit", "unit_price", "total"]
+      }
+    },
+    "subtotal": { "type": "number" },
+    "vat_amount": { "type": "number" },
+    "grand_total": { "type": "number" },
+    "grand_total_en_str": {
+      "type": "string",
+      "pattern": "^[A-Za-z ,\\-]+ And [A-Za-z ,\\-]+ Euro, Zero Cents$",
+      "description": "English words for grand_total with comma before hundreds and 'And' before tens."
+    },
+    "service_total": { "type": "number" },
+    "wht_amount": { "type": "number" },
+    "net_payable": { "type": "number" },
+    "approver_name": { "type": "string" },
+    "approver_title": { "type": "string" }
+  },
+  "required": [
+    "po_number",
+    "po_date",
+    "po_date_str",
+    "delivery_date_str",
+    "project_number",
+    "project_name",
+    "buyer",
+    "vendor",
+    "items",
+    "subtotal",
+    "vat_amount",
+    "grand_total",
+    "grand_total_en_str",
+    "service_total",
+    "wht_amount",
+    "net_payable",
+    "approver_name",
+    "approver_title"
+  ]
+}

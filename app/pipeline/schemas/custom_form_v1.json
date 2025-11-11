@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "form_id": { "type": "integer" },
+    "person": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "fname": { "type": "string" },
+        "lname": { "type": "string" },
+        "dob":   { "type": "string" },
+        "occupation": { "type": "string" },
+        "nationality": { "type": "string" }
+      },
+      "required": []
+    },
+    "passport_no":    { "type": "string" },
+    "dob_str":        { "type": "string" },
+    "flight_no":      { "type": "string" },
+    "origin_city":    { "type": "string" },
+    "arrival_date":   { "type": "string" },
+    "arrival_date_str": { "type": "string" },
+    "family_members": { "type": "integer" },
+    "declare_goods":    { "type": "boolean" },
+    "declare_currency": { "type": "boolean" },
+    "declared_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item":     { "type": "string" },
+          "quantity": { "type": "integer" },
+          "value":    { "type": "number" }
+        },
+        "required": []
+      }
+    },
+    "template_used":  { "type": "string" }
+  },
+  "required": []
+}

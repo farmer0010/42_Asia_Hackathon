@@ -46,12 +46,7 @@ services:
       - llm-server
     restart: on-failure
     # 🔴 [Full GPU 전략 1] Celery-worker에 GPU 할당 (유지)
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
+    runtime: nvidia
 
   redis:
     image: redis:7-alpine
@@ -97,12 +92,7 @@ services:
       - ./models:/models
     restart: always
     # 🔴 [Full GPU 전략 2] llm-server에 GPU 할당 (누락된 부분)
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [ gpu ]
+    runtime: nvidia
 
 volumes:
   redis_data:

@@ -1,0 +1,7 @@
+Customs Declaration has Part 1 (Passenger Information) and Part 2 (Declaration).
+Detect checkboxes: ☑, ☒, [X], [x], ✓, ✔, (checked), (selected).
+
+Return JSON:
+formInfo{documentTitle, authority, metadata}
+passengerInformation{sectionTitle, fullName, occupation, passportNumber, arrivingFlightNo, dateOfBirth, nationality, accompanyingFamilyMembers, fromCity}
+declaration{sectionTitle, status{hasArticlesToDeclare, hasExcessCurrency, hasNothingToDeclare}, declaredItems[], signature, date}
