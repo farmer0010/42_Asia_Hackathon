@@ -51,17 +51,22 @@ scripts/run_local.sh
 
 ---
 
-### 🐳 Docker 실행 (GPU 서버)
+### 🐳 Docker 실행 (GPU 서버) - 추천!
+
+**모델이 Docker 이미지에 포함되어 있어 별도 학습 불필요**
 
 ```bash
-# 입력 준비
-mkdir -p data/input && cp documents/* data/input/
+# 방법 1: Makefile 사용 (권장)
+make build    # 이미지 빌드 (1.1GB 모델 포함)
+make up       # 서비스 시작
 
-# 실행 (docker/ 폴더에서)
-cd docker && docker compose up
+# 방법 2: docker-compose 직접 사용
+cd docker && docker compose up --build
 ```
 
 **결과:** `data/output/final_results.json` (1-2분, NVIDIA GPU)
+
+> 💡 **참고**: 학습된 모델(1.1GB)이 Docker 이미지에 이미 포함되어 있습니다!
 
 ---
 

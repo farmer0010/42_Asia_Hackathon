@@ -25,11 +25,14 @@ COPY scripts/ ./scripts/
 COPY config/ ./config/
 COPY tests/ ./tests/
 
+# 학습된 모델 복사 (1.1GB)
+COPY models/ ./models/
+
 # 실행 권한 부여
 RUN chmod +x scripts/*.sh
 
 # 필요한 디렉토리 생성
-RUN mkdir -p data/input data/output data/models
+RUN mkdir -p data/input data/output
 
 # 환경 변수 설정
 ENV PYTHONPATH=/app

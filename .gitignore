@@ -20,11 +20,6 @@ ENV/
 *.swp
 *.swo
 
-# Model files
-models/*.pth
-models/*.pt
-models/*.bin
-
 # Output files (선택적 - 필요시 주석 해제)
 # outputs/*.json
 # outputs/*.txt

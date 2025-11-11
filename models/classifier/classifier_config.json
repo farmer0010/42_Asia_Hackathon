@@ -1,0 +1,12 @@
+{
+  "model_name": "xlm-roberta-base",
+  "model_class": "XLMRobertaForSequenceClassification",
+  "labels": [
+    "invoice",
+    "purchase_order",
+    "resume",
+    "passport",
+    "custom_form"
+  ],
+  "multilingual": true
+}
