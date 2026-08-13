@@ -17,7 +17,8 @@ import requests
 
 from .config import settings
 from .logger_config import setup_logging
-from .worker import process_document_pipeline, celery_app
+from .worker import celery_app
+from .tasks import process_document_task
 from . import schemas
 from .pipeline import llm_tasks
 
@@ -226,14 +227,11 @@ async def upload_document(file: UploadFile = File(...)):
             buffer.write(await file.read())
 
         # Celery 작업 호출
-        process_document_pipeline.delay(
-            job_id=job_id,
-            file_path=str(temp_file_path),
-            file_name=file.filename,
-            file_mime_type=file.content_type
+        async_result = process_document_task.delay(
+            file_path=str(temp_file_path)
         )
-        log.info(f"[{job_id}] Celery 작업 생성 완료.")
-        return schemas.UploadResponse(job_id=job_id, filename=file.filename)
+        log.info(f"[{job_id}] Celery 작업 생성 완료. Task ID: {async_result.id}")
+        return schemas.UploadResponse(job_id=async_result.id, filename=file.filename)
     except Exception as e:
         log.error(f"파일 업로드 처리 중 심각한 에러 발생: {e}", exc_info=True)
         if temp_file_path.exists():

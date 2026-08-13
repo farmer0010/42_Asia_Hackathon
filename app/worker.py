@@ -51,5 +51,8 @@ celery_app = Celery(
 # 이 설정 덕분에 app/tasks.py 내부의 코드가 실행됩니다.
 celery_app.conf.imports = ("app.tasks",)
 celery_app.conf.task_track_started = True
+celery_app.conf.task_routes = {
+    "process_document_task": {"queue": "gpu_tasks"},
+}
 
 logger.info("Celery app configured. Worker a_waiting tasks...")

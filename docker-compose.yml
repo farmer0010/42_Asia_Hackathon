@@ -29,7 +29,7 @@ services:
 
   celery-worker:
     build: .
-    command: celery -A app.worker.celery_app worker --loglevel=info
+    command: celery -A app.worker.celery_app worker --concurrency=1 --loglevel=info -Q gpu_tasks
     volumes:
       - ./models:/usr/src/models
       # 🔴 [수정] main.py의 새 경로(/uploads_data/input)와 맞춤
@@ -45,8 +45,13 @@ services:
       - meilisearch
       - llm-server
     restart: on-failure
-    # 🔴 [Full GPU 전략 1] Celery-worker에 GPU 할당 (유지)
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   redis:
     image: redis:7-alpine
@@ -91,8 +96,13 @@ services:
     volumes:
       - ./models:/models
     restart: always
-    # 🔴 [Full GPU 전략 2] llm-server에 GPU 할당 (누락된 부분)
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 volumes:
   redis_data:
